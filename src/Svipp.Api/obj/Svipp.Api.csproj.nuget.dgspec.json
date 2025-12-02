@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\fredr\\iCloudDrive\\Kristiania CyberSikkerhet\\5 Semester\\Smidig Prosjekt\\Eksamen\\Svipp-Api\\src\\Svipp.Api\\Svipp.Api.csproj": {}
+    "C:\\Svipp-Api\\src\\Svipp.Api\\Svipp.Api.csproj": {}
   },
   "projects": {
-    "C:\\Users\\fredr\\iCloudDrive\\Kristiania CyberSikkerhet\\5 Semester\\Smidig Prosjekt\\Eksamen\\Svipp-Api\\src\\Svipp.Api\\Svipp.Api.csproj": {
+    "C:\\Svipp-Api\\src\\Svipp.Api\\Svipp.Api.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\fredr\\iCloudDrive\\Kristiania CyberSikkerhet\\5 Semester\\Smidig Prosjekt\\Eksamen\\Svipp-Api\\src\\Svipp.Api\\Svipp.Api.csproj",
+        "projectUniqueName": "C:\\Svipp-Api\\src\\Svipp.Api\\Svipp.Api.csproj",
         "projectName": "Svipp.Api",
-        "projectPath": "C:\\Users\\fredr\\iCloudDrive\\Kristiania CyberSikkerhet\\5 Semester\\Smidig Prosjekt\\Eksamen\\Svipp-Api\\src\\Svipp.Api\\Svipp.Api.csproj",
-        "packagesPath": "C:\\Users\\fredr\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\fredr\\iCloudDrive\\Kristiania CyberSikkerhet\\5 Semester\\Smidig Prosjekt\\Eksamen\\Svipp-Api\\src\\Svipp.Api\\obj\\",
+        "projectPath": "C:\\Svipp-Api\\src\\Svipp.Api\\Svipp.Api.csproj",
+        "packagesPath": "C:\\Users\\trym\\.nuget\\packages\\",
+        "outputPath": "C:\\Svipp-Api\\src\\Svipp.Api\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\fredr\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\trym\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -26,11 +26,11 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\fredr\\iCloudDrive\\Kristiania CyberSikkerhet\\5 Semester\\Smidig Prosjekt\\Eksamen\\Svipp-Api\\src\\Svipp.Application\\Svipp.Application.csproj": {
-                "projectPath": "C:\\Users\\fredr\\iCloudDrive\\Kristiania CyberSikkerhet\\5 Semester\\Smidig Prosjekt\\Eksamen\\Svipp-Api\\src\\Svipp.Application\\Svipp.Application.csproj"
+              "C:\\Svipp-Api\\src\\Svipp.Application\\Svipp.Application.csproj": {
+                "projectPath": "C:\\Svipp-Api\\src\\Svipp.Application\\Svipp.Application.csproj"
               },
-              "C:\\Users\\fredr\\iCloudDrive\\Kristiania CyberSikkerhet\\5 Semester\\Smidig Prosjekt\\Eksamen\\Svipp-Api\\src\\Svipp.Infrastructure\\Svipp.Infrastructure.csproj": {
-                "projectPath": "C:\\Users\\fredr\\iCloudDrive\\Kristiania CyberSikkerhet\\5 Semester\\Smidig Prosjekt\\Eksamen\\Svipp-Api\\src\\Svipp.Infrastructure\\Svipp.Infrastructure.csproj"
+              "C:\\Svipp-Api\\src\\Svipp.Infrastructure\\Svipp.Infrastructure.csproj": {
+                "projectPath": "C:\\Svipp-Api\\src\\Svipp.Infrastructure\\Svipp.Infrastructure.csproj"
               }
             }
           }
@@ -50,9 +50,19 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
               "version": "[8.0.20, )"
+            },
+            "Microsoft.EntityFrameworkCore.Design": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[8.0.0, )"
             },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
@@ -78,21 +88,21 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.414/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.416/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\fredr\\iCloudDrive\\Kristiania CyberSikkerhet\\5 Semester\\Smidig Prosjekt\\Eksamen\\Svipp-Api\\src\\Svipp.Application\\Svipp.Application.csproj": {
+    "C:\\Svipp-Api\\src\\Svipp.Application\\Svipp.Application.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\fredr\\iCloudDrive\\Kristiania CyberSikkerhet\\5 Semester\\Smidig Prosjekt\\Eksamen\\Svipp-Api\\src\\Svipp.Application\\Svipp.Application.csproj",
+        "projectUniqueName": "C:\\Svipp-Api\\src\\Svipp.Application\\Svipp.Application.csproj",
         "projectName": "Svipp.Application",
-        "projectPath": "C:\\Users\\fredr\\iCloudDrive\\Kristiania CyberSikkerhet\\5 Semester\\Smidig Prosjekt\\Eksamen\\Svipp-Api\\src\\Svipp.Application\\Svipp.Application.csproj",
-        "packagesPath": "C:\\Users\\fredr\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\fredr\\iCloudDrive\\Kristiania CyberSikkerhet\\5 Semester\\Smidig Prosjekt\\Eksamen\\Svipp-Api\\src\\Svipp.Application\\obj\\",
+        "projectPath": "C:\\Svipp-Api\\src\\Svipp.Application\\Svipp.Application.csproj",
+        "packagesPath": "C:\\Users\\trym\\.nuget\\packages\\",
+        "outputPath": "C:\\Svipp-Api\\src\\Svipp.Application\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\fredr\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\trym\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -104,8 +114,8 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\fredr\\iCloudDrive\\Kristiania CyberSikkerhet\\5 Semester\\Smidig Prosjekt\\Eksamen\\Svipp-Api\\src\\Svipp.Domain\\Svipp.Domain.csproj": {
-                "projectPath": "C:\\Users\\fredr\\iCloudDrive\\Kristiania CyberSikkerhet\\5 Semester\\Smidig Prosjekt\\Eksamen\\Svipp-Api\\src\\Svipp.Domain\\Svipp.Domain.csproj"
+              "C:\\Svipp-Api\\src\\Svipp.Domain\\Svipp.Domain.csproj": {
+                "projectPath": "C:\\Svipp-Api\\src\\Svipp.Domain\\Svipp.Domain.csproj"
               }
             }
           }
@@ -140,21 +150,21 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.414/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.416/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\fredr\\iCloudDrive\\Kristiania CyberSikkerhet\\5 Semester\\Smidig Prosjekt\\Eksamen\\Svipp-Api\\src\\Svipp.Domain\\Svipp.Domain.csproj": {
+    "C:\\Svipp-Api\\src\\Svipp.Domain\\Svipp.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\fredr\\iCloudDrive\\Kristiania CyberSikkerhet\\5 Semester\\Smidig Prosjekt\\Eksamen\\Svipp-Api\\src\\Svipp.Domain\\Svipp.Domain.csproj",
+        "projectUniqueName": "C:\\Svipp-Api\\src\\Svipp.Domain\\Svipp.Domain.csproj",
         "projectName": "Svipp.Domain",
-        "projectPath": "C:\\Users\\fredr\\iCloudDrive\\Kristiania CyberSikkerhet\\5 Semester\\Smidig Prosjekt\\Eksamen\\Svipp-Api\\src\\Svipp.Domain\\Svipp.Domain.csproj",
-        "packagesPath": "C:\\Users\\fredr\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\fredr\\iCloudDrive\\Kristiania CyberSikkerhet\\5 Semester\\Smidig Prosjekt\\Eksamen\\Svipp-Api\\src\\Svipp.Domain\\obj\\",
+        "projectPath": "C:\\Svipp-Api\\src\\Svipp.Domain\\Svipp.Domain.csproj",
+        "packagesPath": "C:\\Users\\trym\\.nuget\\packages\\",
+        "outputPath": "C:\\Svipp-Api\\src\\Svipp.Domain\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\fredr\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\trym\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -198,21 +208,21 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.414/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.416/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\fredr\\iCloudDrive\\Kristiania CyberSikkerhet\\5 Semester\\Smidig Prosjekt\\Eksamen\\Svipp-Api\\src\\Svipp.Infrastructure\\Svipp.Infrastructure.csproj": {
+    "C:\\Svipp-Api\\src\\Svipp.Infrastructure\\Svipp.Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\fredr\\iCloudDrive\\Kristiania CyberSikkerhet\\5 Semester\\Smidig Prosjekt\\Eksamen\\Svipp-Api\\src\\Svipp.Infrastructure\\Svipp.Infrastructure.csproj",
+        "projectUniqueName": "C:\\Svipp-Api\\src\\Svipp.Infrastructure\\Svipp.Infrastructure.csproj",
         "projectName": "Svipp.Infrastructure",
-        "projectPath": "C:\\Users\\fredr\\iCloudDrive\\Kristiania CyberSikkerhet\\5 Semester\\Smidig Prosjekt\\Eksamen\\Svipp-Api\\src\\Svipp.Infrastructure\\Svipp.Infrastructure.csproj",
-        "packagesPath": "C:\\Users\\fredr\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\fredr\\iCloudDrive\\Kristiania CyberSikkerhet\\5 Semester\\Smidig Prosjekt\\Eksamen\\Svipp-Api\\src\\Svipp.Infrastructure\\obj\\",
+        "projectPath": "C:\\Svipp-Api\\src\\Svipp.Infrastructure\\Svipp.Infrastructure.csproj",
+        "packagesPath": "C:\\Users\\trym\\.nuget\\packages\\",
+        "outputPath": "C:\\Svipp-Api\\src\\Svipp.Infrastructure\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\fredr\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\trym\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -224,11 +234,11 @@
           "net8.0": {
             "targetAlias": "net8.0",
             "projectReferences": {
-              "C:\\Users\\fredr\\iCloudDrive\\Kristiania CyberSikkerhet\\5 Semester\\Smidig Prosjekt\\Eksamen\\Svipp-Api\\src\\Svipp.Application\\Svipp.Application.csproj": {
-                "projectPath": "C:\\Users\\fredr\\iCloudDrive\\Kristiania CyberSikkerhet\\5 Semester\\Smidig Prosjekt\\Eksamen\\Svipp-Api\\src\\Svipp.Application\\Svipp.Application.csproj"
+              "C:\\Svipp-Api\\src\\Svipp.Application\\Svipp.Application.csproj": {
+                "projectPath": "C:\\Svipp-Api\\src\\Svipp.Application\\Svipp.Application.csproj"
               },
-              "C:\\Users\\fredr\\iCloudDrive\\Kristiania CyberSikkerhet\\5 Semester\\Smidig Prosjekt\\Eksamen\\Svipp-Api\\src\\Svipp.Domain\\Svipp.Domain.csproj": {
-                "projectPath": "C:\\Users\\fredr\\iCloudDrive\\Kristiania CyberSikkerhet\\5 Semester\\Smidig Prosjekt\\Eksamen\\Svipp-Api\\src\\Svipp.Domain\\Svipp.Domain.csproj"
+              "C:\\Svipp-Api\\src\\Svipp.Domain\\Svipp.Domain.csproj": {
+                "projectPath": "C:\\Svipp-Api\\src\\Svipp.Domain\\Svipp.Domain.csproj"
               }
             }
           }
@@ -249,6 +259,11 @@
           "targetAlias": "net8.0",
           "dependencies": {
             "Microsoft.EntityFrameworkCore": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.Design": {
+              "suppressParent": "All",
               "target": "Package",
               "version": "[8.0.0, )"
             },
@@ -273,7 +288,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.414/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.416/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

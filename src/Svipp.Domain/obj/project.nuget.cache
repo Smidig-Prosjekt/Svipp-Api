@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "LkfwhhXFCPM=",
+  "dgSpecHash": "0X+pzuyyMYY=",
   "success": true,
-  "projectFilePath": "C:\\Users\\fredr\\iCloudDrive\\Kristiania CyberSikkerhet\\5 Semester\\Smidig Prosjekt\\Eksamen\\Svipp-Api\\src\\Svipp.Domain\\Svipp.Domain.csproj",
+  "projectFilePath": "C:\\Svipp-Api\\src\\Svipp.Domain\\Svipp.Domain.csproj",
   "expectedPackageFiles": [],
   "logs": []
 }
