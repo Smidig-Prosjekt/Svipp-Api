@@ -1,5 +1,7 @@
 ## Svipp API
 
+## Hva skjer a, Fredrik?
+
 Svipp er en tjeneste som gjør det mulig for sjåfører med el‑sparkesykkel å få oppdrag om å hente og kjøre biler hjem for personer som har drukket eller av andre grunner ikke bør kjøre selv.  
 Sjåføren kommer på el‑sparkesykkel, kjører deg hjem i din egen bil, og drar videre til neste oppdrag på sparkesykkelen – litt som Uber, men for deg **og** din bil.
 
