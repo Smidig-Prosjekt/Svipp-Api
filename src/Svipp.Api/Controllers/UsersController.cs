@@ -5,8 +5,7 @@ using Svipp.Api.DTOs;
 using Svipp.Domain.Users;
 using Svipp.Infrastructure;
 using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
+using BCryptNet = BCrypt.Net.BCrypt;
 
 namespace Svipp.Api.Controllers;
 
@@ -369,16 +368,14 @@ public class UsersController : ControllerBase
 
     private static string HashPassword(string password)
     {
-        using var sha = SHA256.Create();
-        var bytes = Encoding.UTF8.GetBytes(password);
-        var hashBytes = sha.ComputeHash(bytes);
-        return Convert.ToHexString(hashBytes);
+        // Use BCrypt for secure password hashing
+        return BCryptNet.HashPassword(password);
     }
 
     private static bool VerifyPassword(string password, string hash)
     {
-        var computed = HashPassword(password);
-        return string.Equals(computed, hash, StringComparison.OrdinalIgnoreCase);
+        // Verify password using BCrypt
+        return BCryptNet.Verify(password, hash);
     }
 
     #endregion
