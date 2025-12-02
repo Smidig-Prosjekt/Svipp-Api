@@ -8,7 +8,6 @@ Sjåføren kommer på el‑sparkesykkel, kjører deg hjem i din egen bil, og dra
 Dette repositoriet inneholder **Svipp API**, som eksponerer funksjonalitet for:
 
 - **Kunder**: bestille henting, se status på oppdrag, historikk m.m.
-- **Sjåfører**: motta og akseptere oppdrag, se rute, fullføre turer.
 - **Administrasjon**: administrere brukere, roller, soner, priser, rapportering m.m. (på sikt).
 
 ---
@@ -126,6 +125,58 @@ Første prioritet i Svipp API er **brukerregistrering** (kunde først, sjåfør 
 
 Når disse stegene er gjennomført, har Svipp API første versjon av **brukerregistrering** klar, og kan utvides med innlogging, sjåførregistrering og oppdragslogikk.
 
+---
 
+## Kjøre utviklingsmiljø lokalt (Development)
 
+For lokal utvikling bruker vi:
 
+- Docker + `docker-compose.yml` for PostgreSQL
+- En `.env.development`-fil for miljøvariabler (database + JWT)
+- `ASPNETCORE_ENVIRONMENT=Development` for å aktivere dev-oppsett i .NET
+
+### 1. Lag `.env.development`
+
+Opprett en fil `/.env.development` i rotmappen med f.eks.:
+
+```bash
+POSTGRES_USER=svipp_dev
+POSTGRES_PASSWORD=svipp_dev_password
+POSTGRES_DB=svipp_dev_db
+POSTGRES_PORT=5432
+
+JWT_SECRET=<din lange, tilfeldige nøkkel>
+JWT_ISSUER=Svipp.Dev
+JWT_AUDIENCE=SvippClients.Dev
+```
+
+> **Tips**: Ikke sjekk inn `.env.development` i git. Legg `.env*` i `.gitignore`.
+
+### 2. Aktiver dev-miljøet og start databasen
+
+I prosjektmappen:
+
+```powershell
+copy .env.development .env
+docker compose up -d
+```
+
+Dette gjør at:
+
+- `docker-compose.yml` leser `POSTGRES_*` fra `.env` og starter Postgres med riktige verdier.
+- Miljøvariablene er tilgjengelige for appen (`POSTGRES_*`, `JWT_*`).
+
+### 3. Kjør API-et i Development
+
+Sett .NET-miljøet til `Development` og start API-et:
+
+```powershell
+$env:ASPNETCORE_ENVIRONMENT = "Development"
+dotnet run --project src/Svipp.Api/Svipp.Api.csproj
+```
+
+Da vil:
+
+- `Program.cs` lese databasekonfig fra miljøvariablene og bruke `SvippDbContext` mot Postgres.
+- JWT-oppsettet bruke `JWT_SECRET`, `JWT_ISSUER`, `JWT_AUDIENCE` fra miljøet.
+- Swagger UI være aktivert (kun i Development).
