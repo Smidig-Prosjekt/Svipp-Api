@@ -50,6 +50,9 @@ public class SvippDbContext : DbContext
 
             entity.HasIndex(u => u.Email)
                 .IsUnique();
+
+            entity.HasIndex(u => u.PhoneNumber)
+                .IsUnique();
         });
 
         // Primary keys

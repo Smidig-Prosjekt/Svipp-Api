@@ -1,9 +1,42 @@
 @Svipp.Api_HostAddress = http://localhost:5087
+@jwt_token = your-jwt-token-here
 
-### Eksempel: registrer/oppdater digital ansvarsoverførings-sjekk før turstart
+### GET /api/users/me - Hent innlogget bruker
+GET {{Svipp.Api_HostAddress}}/api/users/me
+Accept: application/json
+Authorization: Bearer {{jwt_token}}
+
+###
+
+### PUT /api/users/me - Oppdater innlogget bruker
+PUT {{Svipp.Api_HostAddress}}/api/users/me
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "fullName": "John Doe",
+  "email": "john.doe@example.com",
+  "phoneNumber": "+47 987 65 432"
+}
+
+###
+
+### PUT /api/users/me/password - Endre passord
+PUT {{Svipp.Api_HostAddress}}/api/users/me/password
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "currentPassword": "OldPassword123!",
+  "newPassword": "NewSecurePassword456!",
+  "confirmNewPassword": "NewSecurePassword456!"
+}
+
+###
+
+### POST /api/rides/{rideId}/handover-confirmation - Registrer/oppdater digital ansvarsoverførings-sjekk før turstart
 POST {{Svipp.Api_HostAddress}}/api/rides/1/handover-confirmation
 Content-Type: application/json
-Accept: application/json
 
 {
   "customerWillNotDrive": true,
