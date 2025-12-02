@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Svipp.Api.DTOs;
 using Svipp.Domain.Users;
 using Svipp.Infrastructure;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 using BCryptNet = BCrypt.Net.BCrypt;
 
@@ -144,6 +145,20 @@ public class UsersController : ControllerBase
 
             // Sanitize input
             var sanitized = SanitizeUpdateRequest(request);
+
+            // Re-validate sanitized data to ensure sanitization didn't break validity
+            var validationErrors = ValidateSanitizedRequest(sanitized);
+            if (validationErrors.Count > 0)
+            {
+                _logger.LogWarning("Sanitization invalidated input for user {UserId}", userId);
+                return BadRequest(new ErrorResponse
+                {
+                    Message = "Validation failed",
+                    Detail = "Input contains invalid characters that cannot be safely processed",
+                    StatusCode = StatusCodes.Status400BadRequest,
+                    Errors = validationErrors
+                });
+            }
 
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null)
@@ -339,6 +354,36 @@ public class UsersController : ControllerBase
             Email = SanitizeString(request.Email),
             PhoneNumber = SanitizeString(request.PhoneNumber)
         };
+    }
+
+    private static Dictionary<string, string[]> ValidateSanitizedRequest(UpdateUserRequest request)
+    {
+        var errors = new Dictionary<string, List<string>>();
+        var validationContext = new ValidationContext(request, serviceProvider: null, items: null);
+        var validationResults = new List<ValidationResult>();
+
+        if (!Validator.TryValidateObject(request, validationContext, validationResults, validateAllProperties: true))
+        {
+            foreach (var result in validationResults)
+            {
+                var memberNames = result.MemberNames.ToList();
+                if (memberNames.Count == 0)
+                {
+                    memberNames.Add(""); // Add empty key for general errors
+                }
+
+                foreach (var memberName in memberNames)
+                {
+                    if (!errors.ContainsKey(memberName))
+                    {
+                        errors[memberName] = new List<string>();
+                    }
+                    errors[memberName].Add(result.ErrorMessage ?? "Validation failed");
+                }
+            }
+        }
+
+        return errors.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.ToArray());
     }
 
     private static string SanitizeString(string input)
