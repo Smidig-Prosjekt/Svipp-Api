@@ -35,25 +35,36 @@ public class UsersController : ControllerBase
             return BadRequest(new ValidationProblemDetails(errors));
         }
 
-        // Check if email is already in use (unique constraint)
-        var normalizedEmail = request.Email.Trim().ToLowerInvariant();
-        var existingUser = await _dbContext.Users
+        // Check if email is already in use (unique constraint), case-insensitive, uten å endre innsendt verdi
+        var emailLookup = request.Email.ToLowerInvariant();
+        var existingUserByEmail = await _dbContext.Users
             .AsNoTracking()
-            .FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail);
+            .FirstOrDefaultAsync(u => u.Email.ToLower() == emailLookup);
 
-        if (existingUser is not null)
+        if (existingUserByEmail is not null)
         {
             ModelState.AddModelError(nameof(request.Email), "E-postadressen er allerede registrert.");
             return ValidationProblem(ModelState);
         }
 
-        // Create user entity
+        // Check if phone number is already in use (unique constraint)
+        var existingUserByPhone = await _dbContext.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.PhoneNumber == request.PhoneNumber);
+
+        if (existingUserByPhone is not null)
+        {
+            ModelState.AddModelError(nameof(request.PhoneNumber), "Telefonnummeret er allerede registrert på en annen bruker.");
+            return ValidationProblem(ModelState);
+        }
+
+        // Create user entity – lagrer verdiene slik de kom inn i requesten
         var user = new User
         {
             Id = Guid.NewGuid(),
-            FullName = request.FullName.Trim(),
-            Email = normalizedEmail,
-            PhoneNumber = request.PhoneNumber.Trim(),
+            FullName = request.FullName,
+            Email = request.Email,
+            PhoneNumber = request.PhoneNumber,
             PasswordHash = HashPassword(request.Password),
             CreatedAt = DateTime.UtcNow
         };
@@ -84,21 +95,38 @@ public class UsersController : ControllerBase
 
 public class RegisterUserRequest
 {
+    // Fullt navn: minst to ord, kun bokstaver (inkl. norske) og mellomrom, ingen trimming
     [Required(ErrorMessage = "Fullt navn er påkrevd.")]
     [MaxLength(200, ErrorMessage = "Fullt navn kan ikke være lengre enn 200 tegn.")]
+    [RegularExpression(
+        @"^(?=.{1,200}$)(?=.*\s)[A-Za-zÆØÅæøå ]+$",
+        ErrorMessage = "Fullt navn må bestå av minst to ord og bare inneholde bokstaver og mellomrom."
+    )]
     public string FullName { get; set; } = default!;
 
     [Required(ErrorMessage = "E-post er påkrevd.")]
-    [EmailAddress(ErrorMessage = "E-postadressen er ikke gyldig.")]
     [MaxLength(320, ErrorMessage = "E-post kan ikke være lengre enn 320 tegn.")]
+    [RegularExpression(
+        @"^[^@\s]+@[^@\s]+\.[^@\s]+$",
+        ErrorMessage = "E-postadressen må ha et gyldig toppdomene (f.eks. .no eller .com)."
+    )]
     public string Email { get; set; } = default!;
 
+    // Norsk telefonnummer: nøyaktig 8 sifre, ingen trimming
     [Required(ErrorMessage = "Telefonnummer er påkrevd.")]
-    [MaxLength(32, ErrorMessage = "Telefonnummer kan ikke være lengre enn 32 tegn.")]
+    [RegularExpression(
+        @"^\d{8}$",
+        ErrorMessage = "Telefonnummer må være et norsk nummer med nøyaktig 8 sifre."
+    )]
     public string PhoneNumber { get; set; } = default!;
 
+    // Passord: 8–64 tegn, minst én liten, én stor, ett spesialtegn, ingen trimming
     [Required(ErrorMessage = "Passord er påkrevd.")]
-    [MinLength(8, ErrorMessage = "Passord må være minst 8 tegn.")]
+    [RegularExpression(
+        @"^(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,64}$",
+        ErrorMessage = "Passord må være 8–64 tegn og inneholde minst én liten bokstav, én stor bokstav og ett spesialtegn."
+    )]
+    [DataType(DataType.Password)]
     public string Password { get; set; } = default!;
 }
 
