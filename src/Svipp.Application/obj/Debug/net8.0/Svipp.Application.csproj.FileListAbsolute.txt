@@ -1,0 +1,16 @@
+C:\Svipp-Api\src\Svipp.Application\bin\Debug\net8.0\Svipp.Application.deps.json
+C:\Svipp-Api\src\Svipp.Application\bin\Debug\net8.0\Svipp.Application.dll
+C:\Svipp-Api\src\Svipp.Application\bin\Debug\net8.0\Svipp.Application.pdb
+C:\Svipp-Api\src\Svipp.Application\bin\Debug\net8.0\Svipp.Domain.dll
+C:\Svipp-Api\src\Svipp.Application\bin\Debug\net8.0\Svipp.Domain.pdb
+C:\Svipp-Api\src\Svipp.Application\obj\Debug\net8.0\Svipp.Application.csproj.AssemblyReference.cache
+C:\Svipp-Api\src\Svipp.Application\obj\Debug\net8.0\Svipp.Application.GeneratedMSBuildEditorConfig.editorconfig
+C:\Svipp-Api\src\Svipp.Application\obj\Debug\net8.0\Svipp.Application.AssemblyInfoInputs.cache
+C:\Svipp-Api\src\Svipp.Application\obj\Debug\net8.0\Svipp.Application.AssemblyInfo.cs
+C:\Svipp-Api\src\Svipp.Application\obj\Debug\net8.0\Svipp.Application.csproj.CoreCompileInputs.cache
+C:\Svipp-Api\src\Svipp.Application\obj\Debug\net8.0\Svipp.Application.sourcelink.json
+C:\Svipp-Api\src\Svipp.Application\obj\Debug\net8.0\Svipp.Ap.9DCCA4F0.Up2Date
+C:\Svipp-Api\src\Svipp.Application\obj\Debug\net8.0\Svipp.Application.dll
+C:\Svipp-Api\src\Svipp.Application\obj\Debug\net8.0\refint\Svipp.Application.dll
+C:\Svipp-Api\src\Svipp.Application\obj\Debug\net8.0\Svipp.Application.pdb
+C:\Svipp-Api\src\Svipp.Application\obj\Debug\net8.0\ref\Svipp.Application.dll
