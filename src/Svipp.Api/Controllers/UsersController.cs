@@ -157,7 +157,7 @@ public class UsersController : ControllerBase
                 });
             }
 
-            // Check if email is already used by another user
+            // Check if email is already used by another user (case-insensitive comparison)
             var normalizedEmail = sanitized.Email.ToLowerInvariant();
             var emailOwner = await _context.Users
                 .AsNoTracking()
@@ -175,7 +175,7 @@ public class UsersController : ControllerBase
             }
 
             user.FullName = sanitized.FullName;
-            user.Email = normalizedEmail;
+            user.Email = sanitized.Email;
             user.PhoneNumber = sanitized.PhoneNumber;
             user.UpdatedAt = DateTime.UtcNow;
 
