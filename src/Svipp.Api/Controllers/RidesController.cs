@@ -18,12 +18,12 @@ public class RidesController : ControllerBase
     }
 
     /// <summary>
-    /// Registrerer eller oppdaterer digital pre-ride sjekkliste (fit-to-drive) for en tur.
+    /// Registrerer eller oppdaterer digital ansvarsoverførings-sjekk før turstart.
     /// </summary>
-    [HttpPost("{rideId:int}/fit-to-drive-check")]
-    public async Task<ActionResult<FitToDriveCheckResponse>> UpsertFitToDriveCheck(
+    [HttpPost("{rideId:int}/handover-confirmation")]
+    public async Task<ActionResult<HandoverConfirmationResponse>> UpsertHandoverConfirmation(
         [FromRoute] int rideId,
-        [FromBody] FitToDriveCheckRequest request,
+        [FromBody] HandoverConfirmationRequest request,
         CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
@@ -32,7 +32,7 @@ public class RidesController : ControllerBase
         }
 
         var booking = await _dbContext.Bookings
-            .Include(b => b.FitToDriveCheck)
+            .Include(b => b.HandoverConfirmation)
             .FirstOrDefaultAsync(b => b.BookingId == rideId, cancellationToken);
 
         if (booking is null)
@@ -43,55 +43,55 @@ public class RidesController : ControllerBase
         var now = DateTime.UtcNow;
         var confirmedAt = request.ConfirmedAt ?? now;
 
-        if (booking.FitToDriveCheck is null)
+        if (booking.HandoverConfirmation is null)
         {
-            booking.FitToDriveCheck = new FitToDriveCheck
+            booking.HandoverConfirmation = new HandoverConfirmation
             {
                 BookingId = booking.BookingId,
-                CustomerNotFitToDrive = request.CustomerNotFitToDrive,
-                KeysReceived = request.KeysReceived,
+                CustomerWillNotDrive = request.CustomerWillNotDrive,
+                KeysHandedOver = request.KeysHandedOver,
                 ConfirmedAt = confirmedAt,
-                ConfirmedBy = request.ConfirmedBy.Trim()
+                ConfirmedByDriver = request.ConfirmedByDriver.Trim()
             };
 
-            _dbContext.FitToDriveChecks.Add(booking.FitToDriveCheck);
+            _dbContext.HandoverConfirmations.Add(booking.HandoverConfirmation);
         }
         else
         {
-            booking.FitToDriveCheck.CustomerNotFitToDrive = request.CustomerNotFitToDrive;
-            booking.FitToDriveCheck.KeysReceived = request.KeysReceived;
-            booking.FitToDriveCheck.ConfirmedAt = confirmedAt;
-            booking.FitToDriveCheck.ConfirmedBy = request.ConfirmedBy.Trim();
+            booking.HandoverConfirmation.CustomerWillNotDrive = request.CustomerWillNotDrive;
+            booking.HandoverConfirmation.KeysHandedOver = request.KeysHandedOver;
+            booking.HandoverConfirmation.ConfirmedAt = confirmedAt;
+            booking.HandoverConfirmation.ConfirmedByDriver = request.ConfirmedByDriver.Trim();
         }
 
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        var response = new FitToDriveCheckResponse(
+        var response = new HandoverConfirmationResponse(
             booking.BookingId,
-            booking.FitToDriveCheck.FitToDriveCheckId,
-            booking.FitToDriveCheck.CustomerNotFitToDrive,
-            booking.FitToDriveCheck.KeysReceived,
-            booking.FitToDriveCheck.ConfirmedAt,
-            booking.FitToDriveCheck.ConfirmedBy
+            booking.HandoverConfirmation.HandoverConfirmationId,
+            booking.HandoverConfirmation.CustomerWillNotDrive,
+            booking.HandoverConfirmation.KeysHandedOver,
+            booking.HandoverConfirmation.ConfirmedAt,
+            booking.HandoverConfirmation.ConfirmedByDriver
         );
 
         return Ok(response);
     }
 }
 
-public class FitToDriveCheckRequest
+public class HandoverConfirmationRequest
 {
     /// <summary>
-    /// True hvis kunden vurderes som ikke kjørbar.
+    /// True hvis kunden ikke skal kjøre selv.
     /// </summary>
     [Required]
-    public bool CustomerNotFitToDrive { get; set; }
+    public bool CustomerWillNotDrive { get; set; }
 
     /// <summary>
-    /// True hvis nøkler er mottatt.
+    /// True hvis nøkler er overlevert.
     /// </summary>
     [Required]
-    public bool KeysReceived { get; set; }
+    public bool KeysHandedOver { get; set; }
 
     /// <summary>
     /// Tidspunkt for bekreftelse. Hvis null brukes nåværende tidspunkt (UTC).
@@ -99,20 +99,20 @@ public class FitToDriveCheckRequest
     public DateTime? ConfirmedAt { get; set; }
 
     /// <summary>
-    /// Hvem som bekreftet sjekken (navn/ID).
+    /// Hvilken sjåfør som bekreftet (navn/ID).
     /// </summary>
     [Required]
     [MaxLength(200)]
-    public string ConfirmedBy { get; set; } = null!;
+    public string ConfirmedByDriver { get; set; } = null!;
 }
 
-public record FitToDriveCheckResponse(
+public record HandoverConfirmationResponse(
     int BookingId,
-    int FitToDriveCheckId,
-    bool CustomerNotFitToDrive,
-    bool KeysReceived,
+    int HandoverConfirmationId,
+    bool CustomerWillNotDrive,
+    bool KeysHandedOver,
     DateTime ConfirmedAt,
-    string ConfirmedBy
+    string ConfirmedByDriver
 );
 
 

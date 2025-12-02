@@ -2,31 +2,32 @@ using System;
 
 namespace Svipp.Domain.Assignments;
 
-public class FitToDriveCheck
+// Digital ansvarsoverførings-sjekk før turstart
+public class HandoverConfirmation
 {
-    public int FitToDriveCheckId { get; set; }
+    public int HandoverConfirmationId { get; set; }
 
     public int BookingId { get; set; }
 
     /// <summary>
-    /// True hvis kunden vurderes som ikke kjørbar før turen.
+    /// True hvis kunden ikke skal kjøre selv.
     /// </summary>
-    public bool CustomerNotFitToDrive { get; set; }
+    public bool CustomerWillNotDrive { get; set; }
 
     /// <summary>
-    /// True hvis nøkler er mottatt før turen.
+    /// True hvis nøkler er overlevert.
     /// </summary>
-    public bool KeysReceived { get; set; }
+    public bool KeysHandedOver { get; set; }
 
     /// <summary>
-    /// Tidspunkt når sjekken ble bekreftet.
+    /// Tidspunkt når ansvarsoverføringen ble bekreftet.
     /// </summary>
     public DateTime ConfirmedAt { get; set; }
 
     /// <summary>
-    /// Hvem som bekreftet sjekken (for eksempel førerens navn eller ID).
+    /// Hvilken sjåfør som bekreftet (for eksempel navn eller ID).
     /// </summary>
-    public string ConfirmedBy { get; set; } = null!;
+    public string ConfirmedByDriver { get; set; } = null!;
 
     // Navigation
     public Booking Booking { get; set; } = null!;

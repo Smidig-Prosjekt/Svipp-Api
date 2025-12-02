@@ -7,28 +7,28 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Svipp.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddFitToDriveCheck : Migration
+    public partial class AddHandoverConfirmation : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "FitToDriveChecks",
+                name: "HandoverConfirmations",
                 columns: table => new
                 {
-                    FitToDriveCheckId = table.Column<int>(type: "integer", nullable: false)
+                    HandoverConfirmationId = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     BookingId = table.Column<int>(type: "integer", nullable: false),
-                    CustomerNotFitToDrive = table.Column<bool>(type: "boolean", nullable: false),
-                    KeysReceived = table.Column<bool>(type: "boolean", nullable: false),
+                    CustomerWillNotDrive = table.Column<bool>(type: "boolean", nullable: false),
+                    KeysHandedOver = table.Column<bool>(type: "boolean", nullable: false),
                     ConfirmedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    ConfirmedBy = table.Column<string>(type: "text", nullable: false)
+                    ConfirmedByDriver = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_FitToDriveChecks", x => x.FitToDriveCheckId);
+                    table.PrimaryKey("PK_HandoverConfirmations", x => x.HandoverConfirmationId);
                     table.ForeignKey(
-                        name: "FK_FitToDriveChecks_Bookings_BookingId",
+                        name: "FK_HandoverConfirmations_Bookings_BookingId",
                         column: x => x.BookingId,
                         principalTable: "Bookings",
                         principalColumn: "BookingId",
@@ -36,8 +36,8 @@ namespace Svipp.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_FitToDriveChecks_BookingId",
-                table: "FitToDriveChecks",
+                name: "IX_HandoverConfirmations_BookingId",
+                table: "HandoverConfirmations",
                 column: "BookingId",
                 unique: true);
         }
@@ -46,7 +46,7 @@ namespace Svipp.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "FitToDriveChecks");
+                name: "HandoverConfirmations");
         }
     }
 }

@@ -76,13 +76,13 @@ namespace Svipp.Infrastructure.Migrations
                     b.ToTable("Bookings");
                 });
 
-            modelBuilder.Entity("Svipp.Domain.Assignments.FitToDriveCheck", b =>
+            modelBuilder.Entity("Svipp.Domain.Assignments.HandoverConfirmation", b =>
                 {
-                    b.Property<int>("FitToDriveCheckId")
+                    b.Property<int>("HandoverConfirmationId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("FitToDriveCheckId"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("HandoverConfirmationId"));
 
                     b.Property<int>("BookingId")
                         .HasColumnType("integer");
@@ -90,22 +90,22 @@ namespace Svipp.Infrastructure.Migrations
                     b.Property<DateTime>("ConfirmedAt")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("ConfirmedBy")
+                    b.Property<string>("ConfirmedByDriver")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<bool>("CustomerNotFitToDrive")
+                    b.Property<bool>("CustomerWillNotDrive")
                         .HasColumnType("boolean");
 
-                    b.Property<bool>("KeysReceived")
+                    b.Property<bool>("KeysHandedOver")
                         .HasColumnType("boolean");
 
-                    b.HasKey("FitToDriveCheckId");
+                    b.HasKey("HandoverConfirmationId");
 
                     b.HasIndex("BookingId")
                         .IsUnique();
 
-                    b.ToTable("FitToDriveChecks");
+                    b.ToTable("HandoverConfirmations");
                 });
 
             modelBuilder.Entity("Svipp.Domain.Assignments.Customer", b =>
@@ -388,11 +388,11 @@ namespace Svipp.Infrastructure.Migrations
                     b.Navigation("Customer");
                 });
 
-            modelBuilder.Entity("Svipp.Domain.Assignments.FitToDriveCheck", b =>
+            modelBuilder.Entity("Svipp.Domain.Assignments.HandoverConfirmation", b =>
                 {
                     b.HasOne("Svipp.Domain.Assignments.Booking", "Booking")
-                        .WithOne("FitToDriveCheck")
-                        .HasForeignKey("Svipp.Domain.Assignments.FitToDriveCheck", "BookingId")
+                        .WithOne("HandoverConfirmation")
+                        .HasForeignKey("Svipp.Domain.Assignments.HandoverConfirmation", "BookingId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -406,7 +406,7 @@ namespace Svipp.Infrastructure.Migrations
 
                     b.Navigation("Review");
 
-                    b.Navigation("FitToDriveCheck");
+                    b.Navigation("HandoverConfirmation");
                 });
 
             modelBuilder.Entity("Svipp.Domain.Assignments.Customer", b =>
