@@ -2,8 +2,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Svipp.Api.DTOs;
+using Svipp.Domain.Users;
 using Svipp.Infrastructure;
 using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Svipp.Api.Controllers;
 
@@ -110,7 +113,6 @@ public class UsersController : ControllerBase
     {
         try
         {
-            // Validate model state
             if (!ModelState.IsValid)
             {
                 var errors = ModelState
@@ -132,7 +134,7 @@ public class UsersController : ControllerBase
             var userId = GetUserIdFromToken();
             if (userId == null)
             {
-                _logger.LogWarning("Failed to extract user ID from token during update");
+                _logger.LogWarning("Failed to extract user ID from token when updating profile");
                 return Unauthorized(new ErrorResponse
                 {
                     Message = "Invalid authentication token",
@@ -141,10 +143,13 @@ public class UsersController : ControllerBase
                 });
             }
 
-            var user = await _context.Users.FindAsync(userId);
+            // Sanitize input
+            var sanitized = SanitizeUpdateRequest(request);
+
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null)
             {
-                _logger.LogWarning("User {UserId} not found during update", userId);
+                _logger.LogWarning("User {UserId} not found when updating profile", userId);
                 return NotFound(new ErrorResponse
                 {
                     Message = "User not found",
@@ -153,43 +158,15 @@ public class UsersController : ControllerBase
                 });
             }
 
-            // Sanitize and normalize input
-            var sanitizedEmail = request.Email.Trim().ToLowerInvariant();
-            var sanitizedFullName = SanitizeInput(request.FullName.Trim());
-            var sanitizedPhoneNumber = SanitizeInput(request.PhoneNumber.Trim());
+            // Check if email is already used by another user
+            var normalizedEmail = sanitized.Email.ToLowerInvariant();
+            var emailOwner = await _context.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail && u.Id != userId);
 
-            // Validate sanitized input lengths (after sanitization to prevent bypass)
-            var postSanitizationErrors = new Dictionary<string, string[]>();
-            
-            if (sanitizedFullName.Length < 2)
+            if (emailOwner != null)
             {
-                postSanitizationErrors.Add("FullName", new[] { "Full name must be at least 2 characters after sanitization" });
-            }
-            
-            if (sanitizedPhoneNumber.Length < 8)
-            {
-                postSanitizationErrors.Add("PhoneNumber", new[] { "Phone number must be at least 8 characters after sanitization" });
-            }
-
-            if (postSanitizationErrors.Any())
-            {
-                _logger.LogWarning("User {UserId} provided data that became too short after sanitization", userId);
-                return BadRequest(new ErrorResponse
-                {
-                    Message = "Validation failed",
-                    Detail = "One or more fields are too short after removing invalid characters",
-                    StatusCode = StatusCodes.Status400BadRequest,
-                    Errors = postSanitizationErrors
-                });
-            }
-
-            // Check if email is already in use by another user
-            var emailExists = await _context.Users
-                .AnyAsync(u => u.Email.ToLowerInvariant() == sanitizedEmail && u.Id != userId);
-            
-            if (emailExists)
-            {
-                _logger.LogWarning("User {UserId} attempted to use email already in use: {Email}", userId, sanitizedEmail);
+                _logger.LogWarning("Email conflict when updating profile for user {UserId}", userId);
                 return Conflict(new ErrorResponse
                 {
                     Message = "Email already in use",
@@ -198,10 +175,9 @@ public class UsersController : ControllerBase
                 });
             }
 
-            // Update user data
-            user.FullName = sanitizedFullName;
-            user.Email = sanitizedEmail;
-            user.PhoneNumber = sanitizedPhoneNumber;
+            user.FullName = sanitized.FullName;
+            user.Email = normalizedEmail;
+            user.PhoneNumber = sanitized.PhoneNumber;
             user.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
@@ -233,45 +209,16 @@ public class UsersController : ControllerBase
             _logger.LogError(ex, "Unexpected error while updating user profile");
             return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponse
             {
-                Message = "An unexpected error occurred",
+                Message = "Failed to update user profile",
                 StatusCode = StatusCodes.Status500InternalServerError
             });
         }
     }
 
     /// <summary>
-    /// Extract user ID from JWT token claims
-    /// </summary>
-    /// <returns>User ID or null if not found</returns>
-    private Guid? GetUserIdFromToken()
-    {
-        // Try multiple claim types for compatibility
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                       ?? User.FindFirst("sub")?.Value
-                       ?? User.FindFirst("userId")?.Value
-                       ?? User.FindFirst("id")?.Value;
-
-        if (string.IsNullOrWhiteSpace(userIdClaim))
-        {
-            _logger.LogWarning("No user ID claim found in token. Available claims: {Claims}", 
-                string.Join(", ", User.Claims.Select(c => c.Type)));
-            return null;
-        }
-
-        if (Guid.TryParse(userIdClaim, out var userId))
-        {
-            return userId;
-        }
-
-        _logger.LogWarning("Failed to parse user ID claim as GUID: {Claim}", userIdClaim);
-        return null;
-    }
-
-    /// <summary>
-    /// Change user password
+    /// Change password for the current user
     /// </summary>
     /// <param name="request">Password change request</param>
-    /// <returns>Success message</returns>
     /// <response code="200">Password changed successfully</response>
     /// <response code="400">Validation error or incorrect current password</response>
     /// <response code="401">Unauthorized - Invalid or missing JWT token</response>
@@ -285,7 +232,6 @@ public class UsersController : ControllerBase
     {
         try
         {
-            // Validate model state
             if (!ModelState.IsValid)
             {
                 var errors = ModelState
@@ -307,7 +253,7 @@ public class UsersController : ControllerBase
             var userId = GetUserIdFromToken();
             if (userId == null)
             {
-                _logger.LogWarning("Failed to extract user ID from token during password change");
+                _logger.LogWarning("Failed to extract user ID from token when changing password");
                 return Unauthorized(new ErrorResponse
                 {
                     Message = "Invalid authentication token",
@@ -316,10 +262,10 @@ public class UsersController : ControllerBase
                 });
             }
 
-            var user = await _context.Users.FindAsync(userId);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
             if (user == null)
             {
-                _logger.LogWarning("User {UserId} not found during password change", userId);
+                _logger.LogWarning("User {UserId} not found when changing password", userId);
                 return NotFound(new ErrorResponse
                 {
                     Message = "User not found",
@@ -328,10 +274,9 @@ public class UsersController : ControllerBase
                 });
             }
 
-            // Verify current password
-            if (!BCrypt.Net.BCrypt.Verify(request.CurrentPassword, user.PasswordHash))
+            if (!VerifyPassword(request.CurrentPassword, user.PasswordHash))
             {
-                _logger.LogWarning("User {UserId} provided incorrect current password", userId);
+                _logger.LogWarning("Incorrect current password for user {UserId}", userId);
                 return BadRequest(new ErrorResponse
                 {
                     Message = "Incorrect password",
@@ -340,8 +285,7 @@ public class UsersController : ControllerBase
                 });
             }
 
-            // Hash and update new password
-            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+            user.PasswordHash = HashPassword(request.NewPassword);
             user.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
@@ -365,29 +309,77 @@ public class UsersController : ControllerBase
         }
     }
 
-    /// <summary>
-    /// Sanitize user input to prevent XSS and injection attacks
-    /// </summary>
-    /// <param name="input">Raw input string</param>
-    /// <returns>Sanitized string</returns>
-    private static string SanitizeInput(string input)
+    #region Helpers
+
+    private Guid? GetUserIdFromToken()
+    {
+        var user = HttpContext.User;
+        if (user?.Identity is not { IsAuthenticated: true })
+        {
+            return null;
+        }
+
+        var idClaim = user.FindFirst(ClaimTypes.NameIdentifier)
+                      ?? user.FindFirst("sub")
+                      ?? user.FindFirst("userId")
+                      ?? user.FindFirst("id");
+
+        if (idClaim == null)
+        {
+            return null;
+        }
+
+        return Guid.TryParse(idClaim.Value, out var userId) ? userId : null;
+    }
+
+    private static UpdateUserRequest SanitizeUpdateRequest(UpdateUserRequest request)
+    {
+        return new UpdateUserRequest
+        {
+            FullName = SanitizeString(request.FullName),
+            Email = SanitizeString(request.Email),
+            PhoneNumber = SanitizeString(request.PhoneNumber)
+        };
+    }
+
+    private static string SanitizeString(string input)
     {
         if (string.IsNullOrWhiteSpace(input))
-            return input;
+        {
+            return string.Empty;
+        }
 
-        // Remove potentially dangerous characters
-        var sanitized = input
-            .Replace("<", "")
-            .Replace(">", "")
-            .Replace("&", "")
-            .Replace("\"", "")
-            .Replace("'", "")
-            .Replace("/", "")
-            .Replace("\\", "");
+        var trimmed = input.Trim();
+
+        // Remove dangerous characters
+        var dangerousChars = new[] { '<', '>', '&', '"', '\'', '/', '\\' };
+        foreach (var c in dangerousChars)
+        {
+            trimmed = trimmed.Replace(c.ToString(), string.Empty);
+        }
 
         // Normalize whitespace
-        sanitized = System.Text.RegularExpressions.Regex.Replace(sanitized, @"\s+", " ");
+        while (trimmed.Contains("  "))
+        {
+            trimmed = trimmed.Replace("  ", " ");
+        }
 
-        return sanitized.Trim();
+        return trimmed;
     }
+
+    private static string HashPassword(string password)
+    {
+        using var sha = SHA256.Create();
+        var bytes = Encoding.UTF8.GetBytes(password);
+        var hashBytes = sha.ComputeHash(bytes);
+        return Convert.ToHexString(hashBytes);
+    }
+
+    private static bool VerifyPassword(string password, string hash)
+    {
+        var computed = HashPassword(password);
+        return string.Equals(computed, hash, StringComparison.OrdinalIgnoreCase);
+    }
+
+    #endregion
 }
