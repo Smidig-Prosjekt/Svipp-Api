@@ -37,13 +37,24 @@ public class UsersController : ControllerBase
 
         // Check if email is already in use (unique constraint), case-insensitive, uten å endre innsendt verdi
         var emailLookup = request.Email.ToLowerInvariant();
-        var existingUser = await _dbContext.Users
+        var existingUserByEmail = await _dbContext.Users
             .AsNoTracking()
             .FirstOrDefaultAsync(u => u.Email.ToLower() == emailLookup);
 
-        if (existingUser is not null)
+        if (existingUserByEmail is not null)
         {
             ModelState.AddModelError(nameof(request.Email), "E-postadressen er allerede registrert.");
+            return ValidationProblem(ModelState);
+        }
+
+        // Check if phone number is already in use (unique constraint)
+        var existingUserByPhone = await _dbContext.Users
+            .AsNoTracking()
+            .FirstOrDefaultAsync(u => u.PhoneNumber == request.PhoneNumber);
+
+        if (existingUserByPhone is not null)
+        {
+            ModelState.AddModelError(nameof(request.PhoneNumber), "Telefonnummeret er allerede registrert på en annen bruker.");
             return ValidationProblem(ModelState);
         }
 
@@ -94,8 +105,11 @@ public class RegisterUserRequest
     public string FullName { get; set; } = default!;
 
     [Required(ErrorMessage = "E-post er påkrevd.")]
-    [EmailAddress(ErrorMessage = "E-postadressen er ikke gyldig.")]
     [MaxLength(320, ErrorMessage = "E-post kan ikke være lengre enn 320 tegn.")]
+    [RegularExpression(
+        @"^[^@\s]+@[^@\s]+\.[^@\s]+$",
+        ErrorMessage = "E-postadressen må ha et gyldig toppdomene (f.eks. .no eller .com)."
+    )]
     public string Email { get; set; } = default!;
 
     // Norsk telefonnummer: nøyaktig 8 sifre, ingen trimming
