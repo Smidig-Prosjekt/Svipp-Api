@@ -76,6 +76,38 @@ namespace Svipp.Infrastructure.Migrations
                     b.ToTable("Bookings");
                 });
 
+            modelBuilder.Entity("Svipp.Domain.Assignments.FitToDriveCheck", b =>
+                {
+                    b.Property<int>("FitToDriveCheckId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("FitToDriveCheckId"));
+
+                    b.Property<int>("BookingId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("ConfirmedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ConfirmedBy")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("CustomerNotFitToDrive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("KeysReceived")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("FitToDriveCheckId");
+
+                    b.HasIndex("BookingId")
+                        .IsUnique();
+
+                    b.ToTable("FitToDriveChecks");
+                });
+
             modelBuilder.Entity("Svipp.Domain.Assignments.Customer", b =>
                 {
                     b.Property<int>("CustomerId")
@@ -356,12 +388,25 @@ namespace Svipp.Infrastructure.Migrations
                     b.Navigation("Customer");
                 });
 
+            modelBuilder.Entity("Svipp.Domain.Assignments.FitToDriveCheck", b =>
+                {
+                    b.HasOne("Svipp.Domain.Assignments.Booking", "Booking")
+                        .WithOne("FitToDriveCheck")
+                        .HasForeignKey("Svipp.Domain.Assignments.FitToDriveCheck", "BookingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Booking");
+                });
+
             modelBuilder.Entity("Svipp.Domain.Assignments.Booking", b =>
                 {
                     b.Navigation("Payment")
                         .IsRequired();
 
                     b.Navigation("Review");
+
+                    b.Navigation("FitToDriveCheck");
                 });
 
             modelBuilder.Entity("Svipp.Domain.Assignments.Customer", b =>

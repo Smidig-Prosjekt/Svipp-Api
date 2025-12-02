@@ -20,6 +20,7 @@ public class SvippDbContext : DbContext
     public DbSet<Vehicle> Vehicles => Set<Vehicle>();
     public DbSet<Payment> Payments => Set<Payment>();
     public DbSet<Review> Reviews => Set<Review>();
+    public DbSet<FitToDriveCheck> FitToDriveChecks => Set<FitToDriveCheck>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -59,6 +60,7 @@ public class SvippDbContext : DbContext
         modelBuilder.Entity<Booking>().HasKey(x => x.BookingId);
         modelBuilder.Entity<Payment>().HasKey(x => x.PaymentId);
         modelBuilder.Entity<Review>().HasKey(x => x.ReviewId);
+        modelBuilder.Entity<FitToDriveCheck>().HasKey(x => x.FitToDriveCheckId);
 
         // Customer 1-* Booking
         modelBuilder.Entity<Booking>()
@@ -113,6 +115,13 @@ public class SvippDbContext : DbContext
             .HasOne(r => r.Booking)
             .WithOne(b => b.Review)
             .HasForeignKey<Review>(r => r.BookingId);
+
+        // Booking 0-1 FitToDriveCheck (pre-ride sjekkliste)
+        modelBuilder.Entity<FitToDriveCheck>()
+            .HasOne(f => f.Booking)
+            .WithOne(b => b.FitToDriveCheck)
+            .HasForeignKey<FitToDriveCheck>(f => f.BookingId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }
 

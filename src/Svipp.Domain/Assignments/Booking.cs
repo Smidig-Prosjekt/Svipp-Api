@@ -28,6 +28,7 @@ public class Booking
     public Location DropoffLocation { get; set; } = null!;
     public Payment Payment { get; set; } = null!;        // 1-1
     public Review? Review { get; set; }                  // 0-1
+    public FitToDriveCheck? FitToDriveCheck { get; set; } // 0-1 pre-ride sjekkliste
 }
 
 

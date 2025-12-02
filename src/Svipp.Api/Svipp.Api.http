@@ -1,6 +1,15 @@
 @Svipp.Api_HostAddress = http://localhost:5087
 
-GET {{Svipp.Api_HostAddress}}/weatherforecast/
+### Eksempel: registrer/oppdater fit-to-drive sjekkliste for en tur
+POST {{Svipp.Api_HostAddress}}/api/rides/1/fit-to-drive-check
+Content-Type: application/json
 Accept: application/json
+
+{
+  "customerNotFitToDrive": false,
+  "keysReceived": true,
+  "confirmedAt": "2025-12-02T12:00:00Z",
+  "confirmedBy": "driver-123"
+}
 
 ###
