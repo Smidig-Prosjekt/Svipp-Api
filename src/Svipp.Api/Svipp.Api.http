@@ -1,6 +1,35 @@
 @Svipp.Api_HostAddress = http://localhost:5087
+@jwt_token = your-jwt-token-here
 
-GET {{Svipp.Api_HostAddress}}/weatherforecast/
+### GET /api/users/me - Hent innlogget bruker
+GET {{Svipp.Api_HostAddress}}/api/users/me
 Accept: application/json
+Authorization: Bearer {{jwt_token}}
+
+###
+
+### PUT /api/users/me - Oppdater innlogget bruker
+PUT {{Svipp.Api_HostAddress}}/api/users/me
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "fullName": "John Doe",
+  "email": "john.doe@example.com",
+  "phoneNumber": "+47 987 65 432"
+}
+
+###
+
+### PUT /api/users/me/password - Endre passord
+PUT {{Svipp.Api_HostAddress}}/api/users/me/password
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "currentPassword": "OldPassword123!",
+  "newPassword": "NewSecurePassword456!",
+  "confirmNewPassword": "NewSecurePassword456!"
+}
 
 ###
