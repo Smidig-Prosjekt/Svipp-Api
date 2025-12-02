@@ -141,15 +141,15 @@ Dette er en komplett guide for å få Svipp API til å kjøre lokalt.
 
 ### 1. Start PostgreSQL i Docker
 
-I en terminal (PowerShell eller tilsvarende), kjør:
+I en terminal (**PowerShell**), kjør:
 
 ```powershell
-docker run -d ^
-  --name svipp-postgres ^
-  -e POSTGRES_USER=svipp_dev ^
-  -e POSTGRES_PASSWORD=svipp_dev_password ^
-  -e POSTGRES_DB=svipp_dev_db ^
-  -p 5432:5432 ^
+docker run -d `
+  --name svipp-postgres `
+  -e POSTGRES_USER=svipp_dev `
+  -e POSTGRES_PASSWORD=svipp_dev_password `
+  -e POSTGRES_DB=svipp_dev_db `
+  -p 5432:5432 `
   postgres:16
 ```
 
