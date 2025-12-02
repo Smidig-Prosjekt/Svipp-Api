@@ -129,54 +129,82 @@ Når disse stegene er gjennomført, har Svipp API første versjon av **brukerreg
 
 ## Kjøre utviklingsmiljø lokalt (Development)
 
-For lokal utvikling bruker vi:
+Dette er en komplett guide for å få Svipp API til å kjøre lokalt.
 
-- Docker + `docker-compose.yml` for PostgreSQL
-- En `.env.development`-fil for miljøvariabler (database + JWT)
-- `ASPNETCORE_ENVIRONMENT=Development` for å aktivere dev-oppsett i .NET
+### Forutsetninger
 
-### 1. Lag `.env.development`
+- **.NET SDK 8** installert (`dotnet --version` bør vise 8.x).
+- **Docker Desktop** installert og kjørende.
+- Klonet repo: `git clone ...` og åpnet mappen `Svipp-Api`.
 
-Opprett en fil `/.env.development` i rotmappen med f.eks.:
+---
 
-```bash
-POSTGRES_USER=svipp_dev
-POSTGRES_PASSWORD=svipp_dev_password
-POSTGRES_DB=svipp_dev_db
-POSTGRES_PORT=5432
+### 1. Start PostgreSQL i Docker
 
-JWT_SECRET=<din lange, tilfeldige nøkkel>
-JWT_ISSUER=Svipp.Dev
-JWT_AUDIENCE=SvippClients.Dev
-```
-
-> **Tips**: Ikke sjekk inn `.env.development` i git. Legg `.env*` i `.gitignore`.
-
-### 2. Aktiver dev-miljøet og start databasen
-
-I prosjektmappen:
+I en terminal (PowerShell eller tilsvarende), kjør:
 
 ```powershell
-copy .env.development .env
-docker compose up -d
+docker run -d ^
+  --name svipp-postgres ^
+  -e POSTGRES_USER=svipp_dev ^
+  -e POSTGRES_PASSWORD=svipp_dev_password ^
+  -e POSTGRES_DB=svipp_dev_db ^
+  -p 5432:5432 ^
+  postgres:16
 ```
 
-Dette gjør at:
+Dette gjør:
 
-- `docker-compose.yml` leser `POSTGRES_*` fra `.env` og starter Postgres med riktige verdier.
-- Miljøvariablene er tilgjengelige for appen (`POSTGRES_*`, `JWT_*`).
+- Starter en Postgres 16-container kalt `svipp-postgres`.
+- Oppretter databasen `svipp_dev_db` med bruker `svipp_dev` / passord `svipp_dev_password`.
+- Eksponerer databasen på `localhost:5432`.
+- Matcher connection stringen i `src/Svipp.Api/appsettings.Development.json`.
 
-### 3. Kjør API-et i Development
-
-Sett .NET-miljøet til `Development` og start API-et:
+Du kan verifisere at databasen kjører med:
 
 ```powershell
+docker ps
+```
+
+---
+
+### 2. Kjør database-migrasjoner (valgfritt, men anbefalt)
+
+Hvis du har EF Core-migrasjoner (de ligger i `Svipp.Infrastructure/Migrations`), kan du opprette tabellene automatisk:
+
+```powershell
+dotnet tool restore
+dotnet ef database update --project src/Svipp.Infrastructure/Svipp.Infrastructure.csproj --startup-project src/Svipp.Api/Svipp.Api.csproj
+```
+
+Dette:
+
+- Kobler seg til `svipp_dev_db` via dev-connection stringen.
+- Kjør alle migrasjoner slik at databasen får riktige tabeller.
+
+---
+
+### 3. Start API-et i Development
+
+Sett miljø og kjør API-prosjektet:
+
+```powershell
+cd <rotmappen til Svipp-Api>
 $env:ASPNETCORE_ENVIRONMENT = "Development"
 dotnet run --project src/Svipp.Api/Svipp.Api.csproj
 ```
 
-Da vil:
+Når API-et har startet:
 
-- `Program.cs` lese databasekonfig fra miljøvariablene og bruke `SvippDbContext` mot Postgres.
-- JWT-oppsettet bruke `JWT_SECRET`, `JWT_ISSUER`, `JWT_AUDIENCE` fra miljøet.
-- Swagger UI være aktivert (kun i Development).
+- Konsollen viser adressene (typisk `http://localhost:5087` og `https://localhost:7007`).
+- Swagger UI er tilgjengelig på `/swagger`, f.eks. `https://localhost:7007/swagger`.
+
+---
+
+### 4. Hva som skjer under panseret
+
+- `appsettings.Development.json` brukes fordi `ASPNETCORE_ENVIRONMENT=Development`.
+  - Der ligger `ConnectionStrings:DefaultConnection` mot `svipp_dev_db`.
+- `SvippDbContext` i `Svipp.Infrastructure` bruker denne connection stringen for å snakke med Postgres.
+- Når du kaller API-endepunkter (f.eks. senere brukerregistrering), går all DB-tilgang via denne konfigurasjonen.
+
