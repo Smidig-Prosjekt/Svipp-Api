@@ -207,4 +207,3 @@ Når API-et har startet:
   - Der ligger `ConnectionStrings:DefaultConnection` mot `svipp_dev_db`.
 - `SvippDbContext` i `Svipp.Infrastructure` bruker denne connection stringen for å snakke med Postgres.
 - Når du kaller API-endepunkter (f.eks. senere brukerregistrering), går all DB-tilgang via denne konfigurasjonen.
-
