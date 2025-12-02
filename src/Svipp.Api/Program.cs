@@ -3,6 +3,9 @@ using Microsoft.IdentityModel.Tokens;
 using Svipp.Infrastructure;
 using System.Text;
 
+// Fix for Npgsql DateTime handling
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Konfigurasjon
@@ -15,15 +18,10 @@ var connectionString = configuration.GetConnectionString("DefaultConnection")
 builder.Services.AddDbContext<SvippDbContext>(options =>
     options.UseNpgsql(connectionString));
 
-// Auth: JWT
-var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET") ?? configuration["JWT_SECRET"];
+// Auth: JWT (skip for design-time tools like EF migrations)
+var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET") ?? configuration["JWT_SECRET"] ?? "design-time-secret-key-for-ef-migrations-only";
 var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER") ?? configuration["JWT_ISSUER"];
 var jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE") ?? configuration["JWT_AUDIENCE"];
-
-if (string.IsNullOrWhiteSpace(jwtSecret))
-{
-    throw new InvalidOperationException("JWT_SECRET is not configured.");
-}
 
 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret));
 
@@ -55,6 +53,14 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+// Auto-migrate database in Development
+if (app.Environment.IsDevelopment())
+{
+    using var scope = app.Services.CreateScope();
+    var dbContext = scope.ServiceProvider.GetRequiredService<SvippDbContext>();
+    dbContext.Database.Migrate();
+}
 
 // Middleware pipeline
 if (app.Environment.IsDevelopment())
