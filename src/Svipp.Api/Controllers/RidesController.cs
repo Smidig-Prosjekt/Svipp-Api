@@ -22,6 +22,50 @@ public class RidesController : ControllerBase
     }
 
     /// <summary>
+    /// Henter ansvarsoverføringsdetaljer for en gitt tur.
+    /// </summary>
+    [HttpGet("{rideId:int}/handover-confirmation")]
+    [ProducesResponseType(typeof(HandoverConfirmationResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<HandoverConfirmationResponse>> GetHandoverConfirmation(
+        [FromRoute] int rideId,
+        CancellationToken cancellationToken)
+    {
+        var booking = await _dbContext.Bookings
+            .Include(b => b.HandoverConfirmation)
+            .FirstOrDefaultAsync(b => b.BookingId == rideId, cancellationToken);
+
+        if (booking is null)
+        {
+            return NotFound(new ErrorResponse
+            {
+                Message = $"Fant ingen tur/booking med id={rideId}.",
+                StatusCode = StatusCodes.Status404NotFound
+            });
+        }
+
+        if (booking.HandoverConfirmation is null)
+        {
+            return NotFound(new ErrorResponse
+            {
+                Message = $"Fant ingen ansvarsoverføring for tur med id={rideId}.",
+                StatusCode = StatusCodes.Status404NotFound
+            });
+        }
+
+        var response = new HandoverConfirmationResponse(
+            booking.BookingId,
+            booking.HandoverConfirmation.HandoverConfirmationId,
+            booking.HandoverConfirmation.CustomerWillNotDrive,
+            booking.HandoverConfirmation.KeysHandedOver,
+            booking.HandoverConfirmation.ConfirmedAt,
+            booking.HandoverConfirmation.ConfirmedByDriver
+        );
+
+        return Ok(response);
+    }
+
+    /// <summary>
     /// Registrerer eller oppdaterer digital ansvarsoverførings-sjekk før turstart.
     /// </summary>
     [HttpPost("{rideId:int}/handover-confirmation")]
@@ -41,7 +85,11 @@ public class RidesController : ControllerBase
 
         if (booking is null)
         {
-            return NotFound($"Fant ingen tur/booking med id={rideId}.");
+            return NotFound(new ErrorResponse
+            {
+                Message = $"Fant ingen tur/booking med id={rideId}.",
+                StatusCode = StatusCodes.Status404NotFound
+            });
         }
 
         var now = DateTime.UtcNow;
