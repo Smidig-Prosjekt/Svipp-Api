@@ -77,7 +77,8 @@ public class UsersController : ControllerBase
             return Ok(new UserResponse
             {
                 Id = user.Id,
-                FullName = GetFullName(user),
+                FirstName = user.FirstName,
+                LastName = user.LastName,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
                 CreatedAt = user.CreatedAt,
@@ -191,10 +192,8 @@ public class UsersController : ControllerBase
                 });
             }
 
-            // Split full name into first/last for storage
-            var (firstName, lastName) = SplitFullName(sanitized.FullName);
-            user.FirstName = firstName;
-            user.LastName = lastName;
+            user.FirstName = sanitized.FirstName;
+            user.LastName = sanitized.LastName;
             user.Email = sanitized.Email;
             user.PhoneNumber = sanitized.PhoneNumber;
             user.UpdatedAt = DateTime.UtcNow;
@@ -206,7 +205,8 @@ public class UsersController : ControllerBase
             return Ok(new UserResponse
             {
                 Id = user.Id,
-                FullName = GetFullName(user),
+                FirstName = user.FirstName,
+                LastName = user.LastName,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
                 CreatedAt = user.CreatedAt,
@@ -355,7 +355,8 @@ public class UsersController : ControllerBase
     {
         return new UpdateUserRequest
         {
-            FullName = SanitizeString(request.FullName),
+            FirstName = SanitizeString(request.FirstName),
+            LastName = SanitizeString(request.LastName),
             Email = SanitizeString(request.Email),
             PhoneNumber = SanitizeString(request.PhoneNumber)
         };
@@ -414,29 +415,6 @@ public class UsersController : ControllerBase
         }
 
         return trimmed;
-    }
-
-    private static (string FirstName, string LastName) SplitFullName(string fullName)
-    {
-        if (string.IsNullOrWhiteSpace(fullName))
-        {
-            return ("", "");
-        }
-
-        var parts = fullName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        if (parts.Length == 1)
-        {
-            return (parts[0], "");
-        }
-
-        var firstName = parts[0];
-        var lastName = string.Join(" ", parts.Skip(1));
-        return (firstName, lastName);
-    }
-
-    private static string GetFullName(User user)
-    {
-        return string.Join(" ", new[] { user.FirstName, user.LastName }.Where(s => !string.IsNullOrWhiteSpace(s)));
     }
 
     #endregion

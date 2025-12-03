@@ -65,7 +65,8 @@ namespace Svipp.Infrastructure.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    FullName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    FirstName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    LastName = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     Email = table.Column<string>(type: "character varying(320)", maxLength: 320, nullable: false),
                     PhoneNumber = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     PasswordHash = table.Column<string>(type: "text", nullable: false),
@@ -241,6 +242,12 @@ namespace Svipp.Infrastructure.Migrations
                 name: "IX_users_Email",
                 table: "users",
                 column: "Email",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_users_PhoneNumber",
+                table: "users",
+                column: "PhoneNumber",
                 unique: true);
         }
 
