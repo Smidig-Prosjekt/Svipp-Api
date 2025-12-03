@@ -45,6 +45,8 @@ public class AuthController : ControllerBase
     /// </summary>
     /// <remarks>
     /// The JWT token is returned both in the response body and as an HttpOnly cookie named 'session_token'.
+    /// The response body token can be used for API calls with the Authorization header, 
+    /// while the HttpOnly cookie provides automatic authentication for same-origin browser requests.
     /// </remarks>
     /// <param name="request">Registration data</param>
     /// <returns>Authentication token and user data</returns>
@@ -174,6 +176,8 @@ public class AuthController : ControllerBase
     /// </summary>
     /// <remarks>
     /// The JWT token is returned both in the response body and as an HttpOnly cookie named 'session_token'.
+    /// The response body token can be used for API calls with the Authorization header, 
+    /// while the HttpOnly cookie provides automatic authentication for same-origin browser requests.
     /// </remarks>
     /// <param name="request">Login credentials</param>
     /// <returns>Authentication token and user data</returns>
