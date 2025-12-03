@@ -77,7 +77,8 @@ public class UsersController : ControllerBase
             return Ok(new UserResponse
             {
                 Id = user.Id,
-                FullName = user.FullName,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
                 CreatedAt = user.CreatedAt,
@@ -191,7 +192,8 @@ public class UsersController : ControllerBase
                 });
             }
 
-            user.FullName = sanitized.FullName;
+            user.FirstName = sanitized.FirstName;
+            user.LastName = sanitized.LastName;
             user.Email = sanitized.Email;
             user.PhoneNumber = sanitized.PhoneNumber;
             user.UpdatedAt = DateTime.UtcNow;
@@ -203,7 +205,8 @@ public class UsersController : ControllerBase
             return Ok(new UserResponse
             {
                 Id = user.Id,
-                FullName = user.FullName,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
                 Email = user.Email,
                 PhoneNumber = user.PhoneNumber,
                 CreatedAt = user.CreatedAt,
@@ -352,7 +355,8 @@ public class UsersController : ControllerBase
     {
         return new UpdateUserRequest
         {
-            FullName = SanitizeString(request.FullName),
+            FirstName = SanitizeString(request.FirstName),
+            LastName = SanitizeString(request.LastName),
             Email = SanitizeString(request.Email),
             PhoneNumber = SanitizeString(request.PhoneNumber)
         };
@@ -413,6 +417,6 @@ public class UsersController : ControllerBase
         return trimmed;
     }
 
-
     #endregion
 }
+

@@ -7,9 +7,13 @@ namespace Svipp.Api.DTOs;
 /// </summary>
 public class UpdateUserRequest
 {
-    [Required(ErrorMessage = "Full name is required")]
-    [StringLength(200, MinimumLength = 2, ErrorMessage = "Full name must be between 2 and 200 characters")]
-    public string FullName { get; set; } = default!;
+    [Required(ErrorMessage = "First name is required")]
+    [StringLength(100, MinimumLength = 1, ErrorMessage = "First name must be between 1 and 100 characters")]
+    public string FirstName { get; set; } = default!;
+
+    [Required(ErrorMessage = "Last name is required")]
+    [StringLength(100, MinimumLength = 1, ErrorMessage = "Last name must be between 1 and 100 characters")]
+    public string LastName { get; set; } = default!;
     
     [Required(ErrorMessage = "Email is required")]
     [EmailAddress(ErrorMessage = "Invalid email format")]

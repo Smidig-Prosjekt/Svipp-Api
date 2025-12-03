@@ -106,7 +106,8 @@ public class AuthController : ControllerBase
             var user = new User
             {
                 Id = Guid.NewGuid(),
-                FullName = request.FullName.Trim(),
+                FirstName = request.FirstName.Trim(),
+                LastName = request.LastName.Trim(),
                 Email = request.Email.Trim(), // Preserve original casing
                 PhoneNumber = request.PhoneNumber.Trim(),
                 PasswordHash = _passwordHasher.HashPassword(request.Password),
@@ -128,7 +129,8 @@ public class AuthController : ControllerBase
                 User = new UserResponse
                 {
                     Id = user.Id,
-                    FullName = user.FullName,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
                     Email = user.Email,
                     PhoneNumber = user.PhoneNumber,
                     CreatedAt = user.CreatedAt,
@@ -220,7 +222,8 @@ public class AuthController : ControllerBase
                 User = new UserResponse
                 {
                     Id = user.Id,
-                    FullName = user.FullName,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
                     Email = user.Email,
                     PhoneNumber = user.PhoneNumber,
                     CreatedAt = user.CreatedAt,
@@ -261,7 +264,8 @@ public class AuthController : ControllerBase
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Name, user.FullName),
+            new Claim(ClaimTypes.GivenName, user.FirstName),
+            new Claim(ClaimTypes.Surname, user.LastName),
             new Claim("sub", user.Id.ToString()), // Standard JWT claim
             new Claim("userId", user.Id.ToString()) // Additional claim for compatibility
         };
@@ -276,5 +280,6 @@ public class AuthController : ControllerBase
 
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
+
 }
 
