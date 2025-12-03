@@ -85,7 +85,11 @@ public class RidesController : ControllerBase
 
         if (booking is null)
         {
-            return NotFound($"Fant ingen tur/booking med id={rideId}.");
+            return NotFound(new ErrorResponse
+            {
+                Message = $"Fant ingen tur/booking med id={rideId}.",
+                StatusCode = StatusCodes.Status404NotFound
+            });
         }
 
         var now = DateTime.UtcNow;
