@@ -121,11 +121,21 @@ public class AuthController : ControllerBase
 
             // Generate JWT token
             var token = GenerateJwtToken(user);
+            var expiresAt = DateTime.UtcNow.AddHours(24);
+
+            // Set HttpOnly cookie with the token
+            Response.Cookies.Append("session_token", token, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false, // Set to true in production with HTTPS
+                SameSite = SameSiteMode.Lax,
+                Expires = expiresAt
+            });
 
             return CreatedAtAction(nameof(Register), new { id = user.Id }, new AuthResponse
             {
                 Token = token,
-                ExpiresAt = DateTime.UtcNow.AddHours(24), // Token expires in 24 hours
+                ExpiresAt = expiresAt,
                 User = new UserResponse
                 {
                     Id = user.Id,
@@ -214,11 +224,21 @@ public class AuthController : ControllerBase
 
             // Generate JWT token
             var token = GenerateJwtToken(user);
+            var expiresAt = DateTime.UtcNow.AddHours(24);
+
+            // Set HttpOnly cookie with the token
+            Response.Cookies.Append("session_token", token, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false, // Set to true in production with HTTPS
+                SameSite = SameSiteMode.Lax,
+                Expires = expiresAt
+            });
 
             return Ok(new AuthResponse
             {
                 Token = token,
-                ExpiresAt = DateTime.UtcNow.AddHours(24), // Token expires in 24 hours
+                ExpiresAt = expiresAt,
                 User = new UserResponse
                 {
                     Id = user.Id,
