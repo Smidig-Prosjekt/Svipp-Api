@@ -7,28 +7,28 @@ namespace Svipp.Api.DTOs;
 /// </summary>
 public class RegisterRequest
 {
-    [Required(ErrorMessage = "First name is required")]
-    [StringLength(100, MinimumLength = 1, ErrorMessage = "First name must be between 1 and 100 characters")]
+    [Required(ErrorMessage = "Fornavn er påkrevd")]
+    [StringLength(100, MinimumLength = 1, ErrorMessage = "Fornavn må være mellom 1 og 100 tegn")]
     public string FirstName { get; set; } = default!;
 
-    [Required(ErrorMessage = "Last name is required")]
-    [StringLength(100, MinimumLength = 1, ErrorMessage = "Last name must be between 1 and 100 characters")]
+    [Required(ErrorMessage = "Etternavn er påkrevd")]
+    [StringLength(100, MinimumLength = 1, ErrorMessage = "Etternavn må være mellom 1 og 100 tegn")]
     public string LastName { get; set; } = default!;
 
-    [Required(ErrorMessage = "Email is required")]
-    [EmailAddress(ErrorMessage = "Invalid email format")]
-    [StringLength(320, ErrorMessage = "Email must not exceed 320 characters")]
+    [Required(ErrorMessage = "E-post er påkrevd")]
+    [EmailAddress(ErrorMessage = "Ugyldig e-postformat")]
+    [StringLength(320, ErrorMessage = "E-post kan ikke være lengre enn 320 tegn")]
     public string Email { get; set; } = default!;
 
-    [Required(ErrorMessage = "Phone number is required")]
-    [Phone(ErrorMessage = "Invalid phone number format")]
-    [StringLength(32, MinimumLength = 8, ErrorMessage = "Phone number must be between 8 and 32 characters")]
+    [Required(ErrorMessage = "Telefonnummer er påkrevd")]
+    [Phone(ErrorMessage = "Telefonnummer må være på rett format")]
+    [StringLength(32, MinimumLength = 8, ErrorMessage = "Telefonnummer må være mellom 8 og 32 tegn")]
     public string PhoneNumber { get; set; } = default!;
 
-    [Required(ErrorMessage = "Password is required")]
-    [StringLength(100, MinimumLength = 8, ErrorMessage = "Password must be at least 8 characters long")]
+    [Required(ErrorMessage = "Passord er påkrevd")]
+    [StringLength(100, MinimumLength = 8, ErrorMessage = "Passord må være minst 8 tegn")]
     [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$",
-        ErrorMessage = "Password must contain at least one uppercase letter, one lowercase letter, one number and one special character, and only contain allowed characters")]
+        ErrorMessage = "Passordet må ha minst én stor bokstav, én liten bokstav, ett tall og ett spesialtegn")]
     public string Password { get; set; } = default!;
 }
 

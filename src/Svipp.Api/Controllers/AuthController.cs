@@ -70,8 +70,8 @@ public class AuthController : ControllerBase
 
                 return BadRequest(new ErrorResponse
                 {
-                    Message = "Validation failed",
-                    Detail = "One or more fields contain invalid data",
+                    Message = "Validering feilet",
+                    Detail = "Ett eller flere felt inneholder ugyldige data",
                     StatusCode = StatusCodes.Status400BadRequest,
                     Errors = errors
                 });
@@ -88,8 +88,8 @@ public class AuthController : ControllerBase
                 _logger.LogWarning("Registration attempt with existing email: {Email}", normalizedEmail);
                 return BadRequest(new ErrorResponse
                 {
-                    Message = "Email already in use",
-                    Detail = "The provided email address is already registered",
+                    Message = "E-postadressen er allerede i bruk",
+                    Detail = "Den oppgitte e-postadressen er allerede registrert",
                     StatusCode = StatusCodes.Status400BadRequest
                 });
             }
@@ -104,8 +104,8 @@ public class AuthController : ControllerBase
                 _logger.LogWarning("Registration attempt with existing phone number");
                 return BadRequest(new ErrorResponse
                 {
-                    Message = "Phone number already in use",
-                    Detail = "The provided phone number is already registered",
+                    Message = "Telefonnummeret er allerede i bruk",
+                    Detail = "Det oppgitte telefonnummeret er allerede registrert",
                     StatusCode = StatusCodes.Status400BadRequest
                 });
             }
@@ -155,8 +155,8 @@ public class AuthController : ControllerBase
             _logger.LogError(ex, "Database error during user registration");
             return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponse
             {
-                Message = "Failed to register user",
-                Detail = "A database error occurred",
+                Message = "Kunne ikke opprette bruker",
+                Detail = "Det oppstod en databasefeil",
                 StatusCode = StatusCodes.Status500InternalServerError
             });
         }
@@ -165,7 +165,7 @@ public class AuthController : ControllerBase
             _logger.LogError(ex, "Unexpected error during user registration");
             return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponse
             {
-                Message = "An unexpected error occurred",
+                Message = "En uventet feil oppstod",
                 StatusCode = StatusCodes.Status500InternalServerError
             });
         }
@@ -203,8 +203,8 @@ public class AuthController : ControllerBase
 
                 return BadRequest(new ErrorResponse
                 {
-                    Message = "Validation failed",
-                    Detail = "One or more fields contain invalid data",
+                    Message = "Validering feilet",
+                    Detail = "Ett eller flere felt inneholder ugyldige data",
                     StatusCode = StatusCodes.Status400BadRequest,
                     Errors = errors
                 });
@@ -221,8 +221,8 @@ public class AuthController : ControllerBase
                 _logger.LogWarning("Failed login attempt for email: {Email}", normalizedEmail);
                 return Unauthorized(new ErrorResponse
                 {
-                    Message = "Invalid credentials",
-                    Detail = "Email or password is incorrect",
+                    Message = "Ugyldige innloggingsdetaljer",
+                    Detail = "E-post eller passord er feil",
                     StatusCode = StatusCodes.Status401Unauthorized
                 });
             }
@@ -257,7 +257,7 @@ public class AuthController : ControllerBase
             _logger.LogError(ex, "Unexpected error during login");
             return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponse
             {
-                Message = "An unexpected error occurred",
+                Message = "En uventet feil oppstod",
                 StatusCode = StatusCodes.Status500InternalServerError
             });
         }

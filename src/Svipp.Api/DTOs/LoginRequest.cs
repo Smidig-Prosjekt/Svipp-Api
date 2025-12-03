@@ -7,11 +7,11 @@ namespace Svipp.Api.DTOs;
 /// </summary>
 public class LoginRequest
 {
-    [Required(ErrorMessage = "Email is required")]
-    [EmailAddress(ErrorMessage = "Invalid email format")]
+    [Required(ErrorMessage = "E-post er påkrevd")]
+    [EmailAddress(ErrorMessage = "Ugyldig e-postformat")]
     public string Email { get; set; } = default!;
 
-    [Required(ErrorMessage = "Password is required")]
+    [Required(ErrorMessage = "Passord er påkrevd")]
     public string Password { get; set; } = default!;
 }
 
