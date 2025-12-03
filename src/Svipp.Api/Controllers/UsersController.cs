@@ -51,7 +51,8 @@ public class UsersController : ControllerBase
         var user = new User
         {
             Id = Guid.NewGuid(),
-            FullName = request.FullName.Trim(),
+            FirstName = request.FirstName.Trim(),
+            LastName = request.LastName.Trim(),
             Email = normalizedEmail,
             PhoneNumber = request.PhoneNumber.Trim(),
             PasswordHash = HashPassword(request.Password),
@@ -63,7 +64,8 @@ public class UsersController : ControllerBase
 
         var response = new RegisterUserResponse(
             user.Id,
-            user.FullName,
+            user.FirstName,
+            user.LastName,
             user.Email,
             user.PhoneNumber,
             user.CreatedAt
@@ -84,9 +86,13 @@ public class UsersController : ControllerBase
 
 public class RegisterUserRequest
 {
-    [Required(ErrorMessage = "Fullt navn er påkrevd.")]
-    [MaxLength(200, ErrorMessage = "Fullt navn kan ikke være lengre enn 200 tegn.")]
-    public string FullName { get; set; } = default!;
+    [Required(ErrorMessage = "Fornavn er påkrevd.")]
+    [MaxLength(100, ErrorMessage = "Fornavn kan ikke være lengre enn 100 tegn.")]
+    public string FirstName { get; set; } = default!;
+
+    [Required(ErrorMessage = "Etternavn er påkrevd.")]
+    [MaxLength(100, ErrorMessage = "Etternavn kan ikke være lengre enn 100 tegn.")]
+    public string LastName { get; set; } = default!;
 
     [Required(ErrorMessage = "E-post er påkrevd.")]
     [EmailAddress(ErrorMessage = "E-postadressen er ikke gyldig.")]
@@ -104,7 +110,8 @@ public class RegisterUserRequest
 
 public record RegisterUserResponse(
     Guid Id,
-    string FullName,
+    string FirstName,
+    string LastName,
     string Email,
     string PhoneNumber,
     DateTime CreatedAt

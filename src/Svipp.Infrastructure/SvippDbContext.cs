@@ -29,9 +29,13 @@ public class SvippDbContext : DbContext
 
             entity.HasKey(u => u.Id);
 
-            entity.Property(u => u.FullName)
+            entity.Property(u => u.FirstName)
                 .IsRequired()
-                .HasMaxLength(200);
+                .HasMaxLength(100);
+
+            entity.Property(u => u.LastName)
+                .IsRequired()
+                .HasMaxLength(100);
 
             entity.Property(u => u.Email)
                 .IsRequired()
