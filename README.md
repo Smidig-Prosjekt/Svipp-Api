@@ -1,6 +1,6 @@
 ## Svipp API
 
-## Hva skjer a, Fredrik?
+
 
 Svipp er en tjeneste som gjør det mulig for sjåfører med el‑sparkesykkel å få oppdrag om å hente og kjøre biler hjem for personer som har drukket eller av andre grunner ikke bør kjøre selv.  
 Sjåføren kommer på el‑sparkesykkel, kjører deg hjem i din egen bil, og drar videre til neste oppdrag på sparkesykkelen – litt som Uber, men for deg **og** din bil.
@@ -141,15 +141,15 @@ Dette er en komplett guide for å få Svipp API til å kjøre lokalt.
 
 ### 1. Start PostgreSQL i Docker
 
-I en terminal (PowerShell eller tilsvarende), kjør:
+I en terminal (**PowerShell**), kjør:
 
 ```powershell
-docker run -d ^
-  --name svipp-postgres ^
-  -e POSTGRES_USER=svipp_dev ^
-  -e POSTGRES_PASSWORD=svipp_dev_password ^
-  -e POSTGRES_DB=svipp_dev_db ^
-  -p 5432:5432 ^
+docker run -d `
+  --name svipp-postgres `
+  -e POSTGRES_USER=svipp_dev `
+  -e POSTGRES_PASSWORD=svipp_dev_password `
+  -e POSTGRES_DB=svipp_dev_db `
+  -p 5432:5432 `
   postgres:16
 ```
 
@@ -207,4 +207,3 @@ Når API-et har startet:
   - Der ligger `ConnectionStrings:DefaultConnection` mot `svipp_dev_db`.
 - `SvippDbContext` i `Svipp.Infrastructure` bruker denne connection stringen for å snakke med Postgres.
 - Når du kaller API-endepunkter (f.eks. senere brukerregistrering), går all DB-tilgang via denne konfigurasjonen.
-

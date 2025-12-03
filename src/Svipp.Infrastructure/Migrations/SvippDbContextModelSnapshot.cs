@@ -76,6 +76,38 @@ namespace Svipp.Infrastructure.Migrations
                     b.ToTable("Bookings");
                 });
 
+            modelBuilder.Entity("Svipp.Domain.Assignments.HandoverConfirmation", b =>
+                {
+                    b.Property<int>("HandoverConfirmationId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("HandoverConfirmationId"));
+
+                    b.Property<int>("BookingId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("ConfirmedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("ConfirmedByDriver")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("CustomerWillNotDrive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("KeysHandedOver")
+                        .HasColumnType("boolean");
+
+                    b.HasKey("HandoverConfirmationId");
+
+                    b.HasIndex("BookingId")
+                        .IsUnique();
+
+                    b.ToTable("HandoverConfirmations");
+                });
+
             modelBuilder.Entity("Svipp.Domain.Assignments.Customer", b =>
                 {
                     b.Property<int>("CustomerId")
@@ -356,12 +388,25 @@ namespace Svipp.Infrastructure.Migrations
                     b.Navigation("Customer");
                 });
 
+            modelBuilder.Entity("Svipp.Domain.Assignments.HandoverConfirmation", b =>
+                {
+                    b.HasOne("Svipp.Domain.Assignments.Booking", "Booking")
+                        .WithOne("HandoverConfirmation")
+                        .HasForeignKey("Svipp.Domain.Assignments.HandoverConfirmation", "BookingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Booking");
+                });
+
             modelBuilder.Entity("Svipp.Domain.Assignments.Booking", b =>
                 {
                     b.Navigation("Payment")
                         .IsRequired();
 
                     b.Navigation("Review");
+
+                    b.Navigation("HandoverConfirmation");
                 });
 
             modelBuilder.Entity("Svipp.Domain.Assignments.Customer", b =>

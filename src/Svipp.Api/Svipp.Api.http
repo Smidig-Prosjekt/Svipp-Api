@@ -1,6 +1,84 @@
 @Svipp.Api_HostAddress = http://localhost:5087
+@jwt_token = your-jwt-token-here
 
-GET {{Svipp.Api_HostAddress}}/weatherforecast/
+### ============================================
+### TESTING GUIDE:
+### 1. Først: Registrer en ny bruker (eller logg inn)
+### 2. Kopier token fra responsen
+### 3. Sett @jwt_token variabelen over til tokenet
+### 4. Test beskyttede endepunkter
+### ============================================
+
+### POST /api/auth/register - Registrer ny bruker
+POST {{Svipp.Api_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "fullName": "John Doe",
+  "email": "john.doe@example.com",
+  "phoneNumber": "+47 123 45 678",
+  "password": "SecurePassword123!"
+}
+
+### 
+# Kopier token fra "token" feltet i responsen og sett det i @jwt_token variabelen over
+###
+
+### POST /api/auth/login - Logg inn
+POST {{Svipp.Api_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "john.doe@example.com",
+  "password": "SecurePassword123!"
+}
+
+### 
+# Kopier token fra "token" feltet i responsen og sett det i @jwt_token variabelen over
+###
+
+### GET /api/users/me - Hent innlogget bruker (krever JWT token)
+GET {{Svipp.Api_HostAddress}}/api/users/me
 Accept: application/json
+Authorization: Bearer {{jwt_token}}
+
+###
+
+### PUT /api/users/me - Oppdater innlogget bruker
+PUT {{Svipp.Api_HostAddress}}/api/users/me
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "fullName": "John Doe",
+  "email": "john.doe@example.com",
+  "phoneNumber": "+47 987 65 432"
+}
+
+###
+
+### PUT /api/users/me/password - Endre passord
+PUT {{Svipp.Api_HostAddress}}/api/users/me/password
+Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
+
+{
+  "currentPassword": "OldPassword123!",
+  "newPassword": "NewSecurePassword456!",
+  "confirmNewPassword": "NewSecurePassword456!"
+}
+
+###
+
+### POST /api/rides/{rideId}/handover-confirmation - Registrer/oppdater digital ansvarsoverførings-sjekk før turstart
+POST {{Svipp.Api_HostAddress}}/api/rides/1/handover-confirmation
+Content-Type: application/json
+
+{
+  "customerWillNotDrive": true,
+  "keysHandedOver": true,
+  "confirmedAt": "2025-12-02T12:00:00Z",
+  "confirmedByDriver": "driver-123"
+}
 
 ###
