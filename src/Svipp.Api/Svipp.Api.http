@@ -73,6 +73,7 @@ Authorization: Bearer {{jwt_token}}
 ### POST /api/rides/{rideId}/handover-confirmation - Registrer/oppdater digital ansvarsoverførings-sjekk før turstart
 POST {{Svipp.Api_HostAddress}}/api/rides/1/handover-confirmation
 Content-Type: application/json
+Authorization: Bearer {{jwt_token}}
 
 {
   "customerWillNotDrive": true,
@@ -86,11 +87,13 @@ Content-Type: application/json
 ### GET /api/rides/{rideId}/handover-confirmation - Hent ansvarsoverføringsdetaljer for en tur
 GET {{Svipp.Api_HostAddress}}/api/rides/1/handover-confirmation
 Accept: application/json
+Authorization: Bearer {{jwt_token}}
 
 ###
 
 ### POST /api/rides/{rideId}/start - Start tur (krever registrert ansvarsoverføring)
 POST {{Svipp.Api_HostAddress}}/api/rides/1/start
 Accept: application/json
+Authorization: Bearer {{jwt_token}}
 
 ###
