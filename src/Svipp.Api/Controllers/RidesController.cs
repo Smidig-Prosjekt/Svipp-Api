@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Svipp.Domain.Assignments;
@@ -8,6 +9,8 @@ namespace Svipp.Api.Controllers;
 
 [ApiController]
 [Route("api/rides")]
+[Authorize]
+[Produces("application/json")]
 public class RidesController : ControllerBase
 {
     private readonly SvippDbContext _dbContext;

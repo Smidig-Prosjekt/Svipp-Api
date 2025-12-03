@@ -2,11 +2,11 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Svipp.Api.DTOs;
+using Svipp.Api.Services;
 using Svipp.Domain.Users;
 using Svipp.Infrastructure;
 using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
-using BCryptNet = BCrypt.Net.BCrypt;
 
 namespace Svipp.Api.Controllers;
 
@@ -21,11 +21,13 @@ public class UsersController : ControllerBase
 {
     private readonly SvippDbContext _context;
     private readonly ILogger<UsersController> _logger;
+    private readonly PasswordHasher _passwordHasher;
 
-    public UsersController(SvippDbContext context, ILogger<UsersController> logger)
+    public UsersController(SvippDbContext context, ILogger<UsersController> logger, PasswordHasher passwordHasher)
     {
         _context = context;
         _logger = logger;
+        _passwordHasher = passwordHasher;
     }
 
     /// <summary>
@@ -288,7 +290,7 @@ public class UsersController : ControllerBase
                 });
             }
 
-            if (!VerifyPassword(request.CurrentPassword, user.PasswordHash))
+            if (!_passwordHasher.VerifyPassword(request.CurrentPassword, user.PasswordHash))
             {
                 _logger.LogWarning("Incorrect current password for user {UserId}", userId);
                 return BadRequest(new ErrorResponse
@@ -299,7 +301,7 @@ public class UsersController : ControllerBase
                 });
             }
 
-            user.PasswordHash = HashPassword(request.NewPassword);
+            user.PasswordHash = _passwordHasher.HashPassword(request.NewPassword);
             user.UpdatedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
@@ -411,17 +413,6 @@ public class UsersController : ControllerBase
         return trimmed;
     }
 
-    private static string HashPassword(string password)
-    {
-        // Use BCrypt for secure password hashing
-        return BCryptNet.HashPassword(password);
-    }
-
-    private static bool VerifyPassword(string password, string hash)
-    {
-        // Verify password using BCrypt
-        return BCryptNet.Verify(password, hash);
-    }
 
     #endregion
 }

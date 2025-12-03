@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Svipp.Api.Services;
 using Svipp.Infrastructure;
 using System.Text;
 
@@ -18,10 +20,20 @@ var connectionString = configuration.GetConnectionString("DefaultConnection")
 builder.Services.AddDbContext<SvippDbContext>(options =>
     options.UseNpgsql(connectionString));
 
-// Auth: JWT (skip for design-time tools like EF migrations)
-var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET") ?? configuration["JWT_SECRET"] ?? "design-time-secret-key-for-ef-migrations-only";
-var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER") ?? configuration["JWT_ISSUER"];
-var jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE") ?? configuration["JWT_AUDIENCE"];
+// Auth: JWT
+// Priority: Environment variables > appsettings.json (works in all environments)
+// Note: appsettings.Development.json overrides appsettings.json in Development mode
+var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET") 
+                ?? configuration["JWT_SECRET"] 
+                ?? throw new InvalidOperationException(
+                    "JWT_SECRET must be configured. " +
+                    "Set it in appsettings.json, appsettings.Development.json, or as JWT_SECRET environment variable.");
+var jwtIssuer = Environment.GetEnvironmentVariable("JWT_ISSUER") 
+                ?? configuration["JWT_ISSUER"] 
+                ?? "Svipp.Api";
+var jwtAudience = Environment.GetEnvironmentVariable("JWT_AUDIENCE") 
+                  ?? configuration["JWT_AUDIENCE"] 
+                  ?? "Svipp.Client";
 
 var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret));
 
@@ -47,10 +59,75 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
-// Swagger
+// Password hashing service
+builder.Services.AddSingleton<PasswordHasher>();
+
+// CORS configuration
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        if (builder.Environment.IsDevelopment())
+        {
+            policy.AllowAnyOrigin()
+                  .AllowAnyMethod()
+                  .AllowAnyHeader();
+        }
+        else
+        {
+            // In production, configure specific origins
+            var allowedOrigins = configuration["AllowedOrigins"]?.Split(',') 
+                ?? new[] { 
+                    "http://localhost:3000",  // Next.js dev server
+                    "https://svipp.no", 
+                    "https://www.svipp.no" 
+                };
+            
+            policy.WithOrigins(allowedOrigins)
+                  .AllowAnyMethod()
+                  .AllowAnyHeader()
+                  .AllowCredentials();
+        }
+    });
+});
+
+// Swagger with JWT support
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Svipp API",
+        Version = "v1",
+        Description = "API for Svipp - Hjemtransport med el-sparkesykkel"
+    });
+
+    // Add JWT authentication to Swagger
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token in the text input below.\n\nExample: \"Bearer 12345abcdef\"",
+        Name = "Authorization",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+});
 
 var app = builder.Build();
 
@@ -70,6 +147,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors();
 
 app.UseAuthentication();
 app.UseAuthorization();
