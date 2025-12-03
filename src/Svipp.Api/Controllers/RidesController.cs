@@ -162,4 +162,7 @@ public record HandoverConfirmationResponse(
     string ConfirmedByDriver
 );
 
-
+public record StartRideResponse(
+    int BookingId,
+    string Status
+);
