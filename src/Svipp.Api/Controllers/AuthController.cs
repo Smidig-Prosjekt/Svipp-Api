@@ -24,22 +24,28 @@ public class AuthController : ControllerBase
     private readonly IConfiguration _configuration;
     private readonly ILogger<AuthController> _logger;
     private readonly PasswordHasher _passwordHasher;
+    private readonly IWebHostEnvironment _environment;
 
     public AuthController(
         SvippDbContext context,
         IConfiguration configuration,
         ILogger<AuthController> logger,
-        PasswordHasher passwordHasher)
+        PasswordHasher passwordHasher,
+        IWebHostEnvironment environment)
     {
         _context = context;
         _configuration = configuration;
         _logger = logger;
         _passwordHasher = passwordHasher;
+        _environment = environment;
     }
 
     /// <summary>
     /// Register a new user
     /// </summary>
+    /// <remarks>
+    /// The JWT token is returned both in the response body and as an HttpOnly cookie named 'session_token'.
+    /// </remarks>
     /// <param name="request">Registration data</param>
     /// <returns>Authentication token and user data</returns>
     /// <response code="201">User registered successfully</response>
@@ -124,13 +130,7 @@ public class AuthController : ControllerBase
             var expiresAt = DateTime.UtcNow.AddHours(24);
 
             // Set HttpOnly cookie with the token
-            Response.Cookies.Append("session_token", token, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = false, // Set to true in production with HTTPS
-                SameSite = SameSiteMode.Lax,
-                Expires = expiresAt
-            });
+            SetAuthCookie(token, expiresAt);
 
             return CreatedAtAction(nameof(Register), new { id = user.Id }, new AuthResponse
             {
@@ -172,6 +172,9 @@ public class AuthController : ControllerBase
     /// <summary>
     /// Login with email and password
     /// </summary>
+    /// <remarks>
+    /// The JWT token is returned both in the response body and as an HttpOnly cookie named 'session_token'.
+    /// </remarks>
     /// <param name="request">Login credentials</param>
     /// <returns>Authentication token and user data</returns>
     /// <response code="200">Login successful</response>
@@ -227,13 +230,7 @@ public class AuthController : ControllerBase
             var expiresAt = DateTime.UtcNow.AddHours(24);
 
             // Set HttpOnly cookie with the token
-            Response.Cookies.Append("session_token", token, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = false, // Set to true in production with HTTPS
-                SameSite = SameSiteMode.Lax,
-                Expires = expiresAt
-            });
+            SetAuthCookie(token, expiresAt);
 
             return Ok(new AuthResponse
             {
@@ -299,6 +296,22 @@ public class AuthController : ControllerBase
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    /// <summary>
+    /// Sets an HttpOnly cookie with the JWT token for secure authentication.
+    /// </summary>
+    /// <param name="token">The JWT token to store in the cookie</param>
+    /// <param name="expiresAt">The expiration time for the cookie</param>
+    private void SetAuthCookie(string token, DateTime expiresAt)
+    {
+        Response.Cookies.Append("session_token", token, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = !_environment.IsDevelopment(),
+            SameSite = SameSiteMode.Strict,
+            Expires = expiresAt
+        });
     }
 
 }
