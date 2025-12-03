@@ -51,8 +51,8 @@ public class UsersController : ControllerBase
                 _logger.LogWarning("Failed to extract user ID from token");
                 return Unauthorized(new ErrorResponse
                 {
-                    Message = "Invalid authentication token",
-                    Detail = "Unable to identify user from provided token",
+                    Message = "Ugyldig autentiseringstoken",
+                    Detail = "Kunne ikke identifisere bruker fra token",
                     StatusCode = StatusCodes.Status401Unauthorized
                 });
             }
@@ -66,8 +66,8 @@ public class UsersController : ControllerBase
                 _logger.LogWarning("User {UserId} not found in database", userId);
                 return NotFound(new ErrorResponse
                 {
-                    Message = "User not found",
-                    Detail = "The authenticated user does not exist in the system",
+                    Message = "Bruker ikke funnet",
+                    Detail = "Den autentiserte brukeren finnes ikke i systemet",
                     StatusCode = StatusCodes.Status404NotFound
                 });
             }
@@ -90,7 +90,7 @@ public class UsersController : ControllerBase
             _logger.LogError(ex, "Error retrieving user profile");
             return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponse
             {
-                Message = "An error occurred while retrieving user profile",
+                Message = "Det oppstod en feil ved henting av brukerprofil",
                 StatusCode = StatusCodes.Status500InternalServerError
             });
         }
@@ -127,8 +127,8 @@ public class UsersController : ControllerBase
 
                 return BadRequest(new ErrorResponse
                 {
-                    Message = "Validation failed",
-                    Detail = "One or more fields contain invalid data",
+                    Message = "Validering feilet",
+                    Detail = "Ett eller flere felt inneholder ugyldige data",
                     StatusCode = StatusCodes.Status400BadRequest,
                     Errors = errors
                 });
@@ -140,8 +140,8 @@ public class UsersController : ControllerBase
                 _logger.LogWarning("Failed to extract user ID from token when updating profile");
                 return Unauthorized(new ErrorResponse
                 {
-                    Message = "Invalid authentication token",
-                    Detail = "Unable to identify user from provided token",
+                    Message = "Ugyldig autentiseringstoken",
+                    Detail = "Kunne ikke identifisere bruker fra token",
                     StatusCode = StatusCodes.Status401Unauthorized
                 });
             }
@@ -169,8 +169,8 @@ public class UsersController : ControllerBase
                 _logger.LogWarning("User {UserId} not found when updating profile", userId);
                 return NotFound(new ErrorResponse
                 {
-                    Message = "User not found",
-                    Detail = "The authenticated user does not exist in the system",
+                    Message = "Bruker ikke funnet",
+                    Detail = "Den autentiserte brukeren finnes ikke i systemet",
                     StatusCode = StatusCodes.Status404NotFound
                 });
             }
@@ -186,8 +186,8 @@ public class UsersController : ControllerBase
                 _logger.LogWarning("Email conflict when updating profile for user {UserId}", userId);
                 return Conflict(new ErrorResponse
                 {
-                    Message = "Email already in use",
-                    Detail = "The provided email address is already registered to another user",
+                    Message = "E-postadressen er allerede i bruk",
+                    Detail = "Den oppgitte e-postadressen er allerede registrert av en annen bruker",
                     StatusCode = StatusCodes.Status409Conflict
                 });
             }
@@ -218,8 +218,8 @@ public class UsersController : ControllerBase
             _logger.LogError(ex, "Database error while updating user profile");
             return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponse
             {
-                Message = "Failed to update user profile",
-                Detail = "A database error occurred",
+                Message = "Kunne ikke oppdatere brukerprofil",
+                Detail = "Det oppstod en databasefeil",
                 StatusCode = StatusCodes.Status500InternalServerError
             });
         }
@@ -228,7 +228,7 @@ public class UsersController : ControllerBase
             _logger.LogError(ex, "Unexpected error while updating user profile");
             return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponse
             {
-                Message = "Failed to update user profile",
+                Message = "Kunne ikke oppdatere brukerprofil",
                 StatusCode = StatusCodes.Status500InternalServerError
             });
         }
@@ -262,8 +262,8 @@ public class UsersController : ControllerBase
 
                 return BadRequest(new ErrorResponse
                 {
-                    Message = "Validation failed",
-                    Detail = "One or more fields contain invalid data",
+                    Message = "Validering feilet",
+                    Detail = "Ett eller flere felt inneholder ugyldige data",
                     StatusCode = StatusCodes.Status400BadRequest,
                     Errors = errors
                 });
@@ -275,8 +275,8 @@ public class UsersController : ControllerBase
                 _logger.LogWarning("Failed to extract user ID from token when changing password");
                 return Unauthorized(new ErrorResponse
                 {
-                    Message = "Invalid authentication token",
-                    Detail = "Unable to identify user from provided token",
+                    Message = "Ugyldig autentiseringstoken",
+                    Detail = "Kunne ikke identifisere bruker fra token",
                     StatusCode = StatusCodes.Status401Unauthorized
                 });
             }
@@ -287,8 +287,8 @@ public class UsersController : ControllerBase
                 _logger.LogWarning("User {UserId} not found when changing password", userId);
                 return NotFound(new ErrorResponse
                 {
-                    Message = "User not found",
-                    Detail = "The authenticated user does not exist in the system",
+                    Message = "Bruker ikke funnet",
+                    Detail = "Den autentiserte brukeren finnes ikke i systemet",
                     StatusCode = StatusCodes.Status404NotFound
                 });
             }
@@ -298,8 +298,8 @@ public class UsersController : ControllerBase
                 _logger.LogWarning("Incorrect current password for user {UserId}", userId);
                 return BadRequest(new ErrorResponse
                 {
-                    Message = "Incorrect password",
-                    Detail = "The current password provided is incorrect",
+                    Message = "Feil passord",
+                    Detail = "Det nåværende passordet er feil",
                     StatusCode = StatusCodes.Status400BadRequest
                 });
             }
@@ -313,7 +313,7 @@ public class UsersController : ControllerBase
 
             return Ok(new
             {
-                message = "Password changed successfully",
+                message = "Passord endret",
                 timestamp = DateTime.UtcNow
             });
         }
@@ -322,7 +322,7 @@ public class UsersController : ControllerBase
             _logger.LogError(ex, "Unexpected error while changing password");
             return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponse
             {
-                Message = "An unexpected error occurred",
+                Message = "En uventet feil oppstod",
                 StatusCode = StatusCodes.Status500InternalServerError
             });
         }

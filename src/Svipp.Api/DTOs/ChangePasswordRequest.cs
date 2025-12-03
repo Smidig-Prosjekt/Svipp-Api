@@ -7,17 +7,17 @@ namespace Svipp.Api.DTOs;
 /// </summary>
 public class ChangePasswordRequest
 {
-    [Required(ErrorMessage = "Current password is required")]
+    [Required(ErrorMessage = "Nåværende passord er påkrevd")]
     public string CurrentPassword { get; set; } = default!;
     
-    [Required(ErrorMessage = "New password is required")]
-    [StringLength(100, MinimumLength = 8, ErrorMessage = "Password must be at least 8 characters long")]
+    [Required(ErrorMessage = "Nytt passord er påkrevd")]
+    [StringLength(100, MinimumLength = 8, ErrorMessage = "Passord må være minst 8 tegn")]
     [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]+$",
-        ErrorMessage = "Password must contain at least one uppercase letter, one lowercase letter, one number and one special character, and only contain allowed characters")]
+        ErrorMessage = "Passordet må ha minst én stor bokstav, én liten bokstav, ett tall og ett spesialtegn")]
     public string NewPassword { get; set; } = default!;
     
-    [Required(ErrorMessage = "Password confirmation is required")]
-    [Compare("NewPassword", ErrorMessage = "New password and confirmation do not match")]
+    [Required(ErrorMessage = "Bekreftelse av nytt passord er påkrevd")]
+    [Compare("NewPassword", ErrorMessage = "Nytt passord og bekreftelse stemmer ikke overens")]
     public string ConfirmNewPassword { get; set; } = default!;
 }
 
