@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Svipp.Api.DTOs;
 using Svipp.Domain.Assignments;
 using Svipp.Infrastructure;
 
@@ -77,6 +78,49 @@ public class RidesController : ControllerBase
             booking.HandoverConfirmation.ConfirmedAt,
             booking.HandoverConfirmation.ConfirmedByDriver
         );
+
+        return Ok(response);
+    }
+
+    /// <summary>
+    /// Starter en tur etter at ansvarsoverføring er bekreftet.
+    /// </summary>
+    [HttpPost("{rideId:int}/start")]
+    [ProducesResponseType(typeof(StartRideResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
+    public async Task<ActionResult<StartRideResponse>> StartRide(
+        [FromRoute] int rideId,
+        CancellationToken cancellationToken)
+    {
+        var booking = await _dbContext.Bookings
+            .Include(b => b.HandoverConfirmation)
+            .FirstOrDefaultAsync(b => b.BookingId == rideId, cancellationToken);
+
+        if (booking is null)
+        {
+            return NotFound(new ErrorResponse
+            {
+                Message = $"Fant ingen tur/booking med id={rideId}.",
+                StatusCode = StatusCodes.Status404NotFound
+            });
+        }
+
+        if (booking.HandoverConfirmation is null)
+        {
+            return Conflict(new ErrorResponse
+            {
+                Message = "Kan ikke starte tur uten registrert ansvarsoverføring.",
+                Detail = "Bruk endepunktet /handover-confirmation før du starter turen.",
+                StatusCode = StatusCodes.Status409Conflict
+            });
+        }
+
+        booking.Status = "Started";
+
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
+        var response = new StartRideResponse(booking.BookingId, booking.Status);
 
         return Ok(response);
     }
