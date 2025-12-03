@@ -82,3 +82,15 @@ Content-Type: application/json
 }
 
 ###
+
+### GET /api/rides/{rideId}/handover-confirmation - Hent ansvarsoverføringsdetaljer for en tur
+GET {{Svipp.Api_HostAddress}}/api/rides/1/handover-confirmation
+Accept: application/json
+
+###
+
+### POST /api/rides/{rideId}/start - Start tur (krever registrert ansvarsoverføring)
+POST {{Svipp.Api_HostAddress}}/api/rides/1/start
+Accept: application/json
+
+###
