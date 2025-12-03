@@ -75,7 +75,8 @@ Første prioritet i Svipp API er **brukerregistrering** (kunde først, sjåfør 
 - **Enkel domenemodell (første versjon)**:
   - `User` / `Customer` med felter som:
     - Id (GUID)
-    - FullName
+    - FirstName
+    - LastName
     - Email
     - PhoneNumber
     - PasswordHash
