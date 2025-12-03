@@ -102,11 +102,15 @@ public class AuthController : ControllerBase
                 });
             }
 
+            // Split full name into first/last for storage
+            var (firstName, lastName) = SplitFullName(request.FullName);
+
             // Create new user
             var user = new User
             {
                 Id = Guid.NewGuid(),
-                FullName = request.FullName.Trim(),
+                FirstName = firstName,
+                LastName = lastName,
                 Email = request.Email.Trim(), // Preserve original casing
                 PhoneNumber = request.PhoneNumber.Trim(),
                 PasswordHash = _passwordHasher.HashPassword(request.Password),
@@ -128,7 +132,7 @@ public class AuthController : ControllerBase
                 User = new UserResponse
                 {
                     Id = user.Id,
-                    FullName = user.FullName,
+                    FullName = GetFullName(user),
                     Email = user.Email,
                     PhoneNumber = user.PhoneNumber,
                     CreatedAt = user.CreatedAt,
@@ -220,7 +224,7 @@ public class AuthController : ControllerBase
                 User = new UserResponse
                 {
                     Id = user.Id,
-                    FullName = user.FullName,
+                    FullName = GetFullName(user),
                     Email = user.Email,
                     PhoneNumber = user.PhoneNumber,
                     CreatedAt = user.CreatedAt,
@@ -261,7 +265,7 @@ public class AuthController : ControllerBase
         {
             new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.Name, user.FullName),
+            new Claim(ClaimTypes.Name, GetFullName(user)),
             new Claim("sub", user.Id.ToString()), // Standard JWT claim
             new Claim("userId", user.Id.ToString()) // Additional claim for compatibility
         };
@@ -275,6 +279,29 @@ public class AuthController : ControllerBase
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    private static (string FirstName, string LastName) SplitFullName(string fullName)
+    {
+        if (string.IsNullOrWhiteSpace(fullName))
+        {
+            return ("", "");
+        }
+
+        var parts = fullName.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 1)
+        {
+            return (parts[0], "");
+        }
+
+        var firstName = parts[0];
+        var lastName = string.Join(" ", parts.Skip(1));
+        return (firstName, lastName);
+    }
+
+    private static string GetFullName(User user)
+    {
+        return string.Join(" ", new[] { user.FirstName, user.LastName }.Where(s => !string.IsNullOrWhiteSpace(s)));
     }
 }
 
