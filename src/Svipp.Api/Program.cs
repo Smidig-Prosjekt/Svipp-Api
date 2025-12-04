@@ -61,6 +61,8 @@ builder.Services.AddAuthorization();
 
 // Password hashing service
 builder.Services.AddSingleton<PasswordHasher>();
+builder.Services.AddHttpClient<RoadsService>();
+builder.Services.AddHttpClient<DirectionsService>();
 
 // CORS configuration
 builder.Services.AddCors(options =>
