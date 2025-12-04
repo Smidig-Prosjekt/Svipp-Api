@@ -14,6 +14,11 @@ public class Customer
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
 
+    // Sist kjente posisjon for kunde (f.eks. når bestilling opprettes)
+    public double? CurrentLatitude { get; set; }
+    public double? CurrentLongitude { get; set; }
+    public DateTime? LastLocationUpdatedAt { get; set; }
+
     public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
     public ICollection<Review> Reviews { get; set; } = new List<Review>();
 }

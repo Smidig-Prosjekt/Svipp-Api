@@ -77,14 +77,6 @@ namespace Svipp.Infrastructure.Migrations
                 oldType: "timestamp with time zone");
 
             migrationBuilder.AlterColumn<DateTime>(
-                name: "ConfirmedAt",
-                table: "HandoverConfirmations",
-                type: "timestamp without time zone",
-                nullable: false,
-                oldClrType: typeof(DateTime),
-                oldType: "timestamp with time zone");
-
-            migrationBuilder.AlterColumn<DateTime>(
                 name: "UpdatedAt",
                 table: "Customers",
                 type: "timestamp without time zone",
@@ -176,14 +168,6 @@ namespace Svipp.Infrastructure.Migrations
             migrationBuilder.AlterColumn<DateTime>(
                 name: "Date",
                 table: "Payments",
-                type: "timestamp with time zone",
-                nullable: false,
-                oldClrType: typeof(DateTime),
-                oldType: "timestamp without time zone");
-
-            migrationBuilder.AlterColumn<DateTime>(
-                name: "ConfirmedAt",
-                table: "HandoverConfirmations",
                 type: "timestamp with time zone",
                 nullable: false,
                 oldClrType: typeof(DateTime),
