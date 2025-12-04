@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Svipp.Infrastructure;
@@ -11,9 +12,11 @@ using Svipp.Infrastructure;
 namespace Svipp.Infrastructure.Migrations
 {
     [DbContext(typeof(SvippDbContext))]
-    partial class SvippDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251204084838_AddVehicleDetailsToVehicle")]
+    partial class AddVehicleDetailsToVehicle
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -253,43 +256,6 @@ namespace Svipp.Infrastructure.Migrations
                     b.ToTable("Reviews");
                 });
 
-            modelBuilder.Entity("Svipp.Domain.Assignments.Scooter", b =>
-                {
-                    b.Property<int>("ScooterId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("ScooterId"));
-
-                    b.Property<int>("BatteryLevelPercent")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Brand")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<int?>("CurrentLocationId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("DriverId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("MaxRangeKm")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("Model")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("ScooterId");
-
-                    b.HasIndex("CurrentLocationId");
-
-                    b.HasIndex("DriverId");
-
-                    b.ToTable("Scooters");
-                });
-
             modelBuilder.Entity("Svipp.Domain.Assignments.Vehicle", b =>
                 {
                     b.Property<int>("VehicleId")
@@ -461,23 +427,6 @@ namespace Svipp.Infrastructure.Migrations
                     b.Navigation("Customer");
                 });
 
-            modelBuilder.Entity("Svipp.Domain.Assignments.Scooter", b =>
-                {
-                    b.HasOne("Svipp.Domain.Assignments.Location", "CurrentLocation")
-                        .WithMany()
-                        .HasForeignKey("CurrentLocationId");
-
-                    b.HasOne("Svipp.Domain.Assignments.Driver", "Driver")
-                        .WithMany("Scooters")
-                        .HasForeignKey("DriverId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("CurrentLocation");
-
-                    b.Navigation("Driver");
-                });
-
             modelBuilder.Entity("Svipp.Domain.Assignments.Booking", b =>
                 {
                     b.Navigation("HandoverConfirmation");
@@ -498,8 +447,6 @@ namespace Svipp.Infrastructure.Migrations
             modelBuilder.Entity("Svipp.Domain.Assignments.Driver", b =>
                 {
                     b.Navigation("Bookings");
-
-                    b.Navigation("Scooters");
                 });
 
             modelBuilder.Entity("Svipp.Domain.Assignments.Location", b =>

@@ -111,6 +111,15 @@ Første prioritet i Svipp API er **brukerregistrering** (kunde først, sjåfør 
    - Lage en enkel `User`/`Customer`‑entitet i `Svipp.Domain`.
    - Evt. skille mellom kunde og sjåfør senere (`Customer` og `Driver`).
 
+2b. **Domenemodell for bil og sparkesykkel**
+   - Bil (`Vehicle` i `Svipp.Domain.Assignments`):
+     - Grunnfelter: registreringsnummer, type (personbil, varebil osv.), farge.
+     - Detaljer: merke (`Make`), modell (`Model`), årsmodell (`Year`), bagasjeromsvolum (`TrunkVolumeLiters`) og eventuelt dimensjoner (`TrunkDimensions`).
+     - Knyttes til `Booking` slik at hvert oppdrag vet hvilken bil som flyttes.
+   - El‑sparkesykkel (planlagt egen entitet, f.eks. `Scooter`):
+     - Felter som modell/merke, rekkevidde (`MaxRangeKm`), batterinivå og nåværende posisjon.
+     - Knyttes til `Driver` for å beskrive hvilket arbeidsverktøy sjåføren bruker mellom oppdrag.
+
 3. **Application‑lag for registrering**
    - Lage en kommando / service for brukerregistrering i `Svipp.Application`.
    - Legge på enkel validering (e‑postformat, passordlengde osv.).
