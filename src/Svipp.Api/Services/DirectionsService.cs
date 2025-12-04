@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Svipp.Api.Services;
@@ -38,6 +39,8 @@ public class DirectionsService
         var dLat = destLat.ToString(CultureInfo.InvariantCulture);
         var dLng = destLng.ToString(CultureInfo.InvariantCulture);
 
+        // WARNING: The API key is included in the URL. Logging this URL may expose the API key in log files.
+        // Ensure that HTTP client logging and error logs do not record this URL, or redact the 'key' query parameter if logging is necessary.
         var url =
             $"https://maps.googleapis.com/maps/api/directions/json?origin={oLat},{oLng}&destination={dLat},{dLng}&mode=driving&key={_apiKey}";
 
@@ -60,7 +63,16 @@ public class DirectionsService
 
         var json = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken: cancellationToken);
 
-        var status = json.GetProperty("status").GetString();
+        if (json.ValueKind == JsonValueKind.Undefined || json.ValueKind == JsonValueKind.Null)
+        {
+            throw new InvalidOperationException("Directions API returnerte ugyldig respons");
+        }
+
+        if (!json.TryGetProperty("status", out var statusElement) || statusElement.ValueKind != JsonValueKind.String)
+        {
+            throw new InvalidOperationException("Directions API-respons mangler 'status' property.");
+        }
+        var status = statusElement.GetString();
         if (!string.Equals(status, "OK", StringComparison.OrdinalIgnoreCase))
         {
             var errorMessage = json.TryGetProperty("error_message", out var errorMsg)

@@ -12,8 +12,8 @@ using Svipp.Infrastructure;
 namespace Svipp.Infrastructure.Migrations
 {
     [DbContext(typeof(SvippDbContext))]
-    [Migration("20251204115156_CreateHandoverConfirmationsTable")]
-    partial class CreateHandoverConfirmationsTable
+    [Migration("20251204115156_AddLocationFieldsToCustomersAndDrivers")]
+    partial class AddLocationFieldsToCustomersAndDrivers
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
