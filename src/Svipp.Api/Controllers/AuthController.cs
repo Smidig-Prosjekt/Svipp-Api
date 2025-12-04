@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -263,6 +264,77 @@ public class AuthController : ControllerBase
         }
     }
 
+    [HttpGet("session")]
+    public async Task<ActionResult<AuthResponse>> Session()
+    {
+        try
+        {
+            string? sessionToken = HttpContext.Request.Cookies["session_token"];
+            if (sessionToken == null)
+            {
+                return StatusCode(StatusCodes.Status401Unauthorized);
+            }
+
+            bool isValid = ValidateToken(sessionToken);
+            if(isValid)
+            {
+
+                var handler = new JwtSecurityTokenHandler();
+                var token = handler.ReadJwtToken(sessionToken);
+                var userIdClaim = token.Claims.FirstOrDefault(c => c.Type == "userId");
+
+                if(userIdClaim == null)
+                {
+                    return StatusCode(StatusCodes.Status419AuthenticationTimeout, new ErrorResponse
+                    {
+                        Message = "Sesjon utløpt, logg inn på ny",
+                        StatusCode = StatusCodes.Status419AuthenticationTimeout
+                    });
+                }
+
+                string userId = userIdClaim.Value;
+                Guid guid = Guid.Parse(userId);
+
+                var user = await _context.Users
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(u => u.Id == guid);
+
+                if (user == null)
+                {
+                    return NotFound();
+                }
+
+                return Ok( new UserResponse
+                {
+                    Id = guid,
+                    FirstName = user.FirstName,
+                    LastName = user.LastName,
+                    Email = user.Email,
+                    PhoneNumber = user.PhoneNumber,
+                    CreatedAt = user.CreatedAt,
+                    UpdatedAt = user.UpdatedAt
+                });
+            } 
+            else
+            {
+                return StatusCode(StatusCodes.Status419AuthenticationTimeout, new ErrorResponse
+                {
+                    Message = "Sesjon utløpt, logg inn på ny",
+                    StatusCode = StatusCodes.Status419AuthenticationTimeout
+                });
+            }
+
+        } catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error during session check");
+            return StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponse
+            {
+                Message = "En uventet feil oppstod",
+                StatusCode = StatusCodes.Status500InternalServerError
+            });
+        }
+    }
+
     private string GenerateJwtToken(User user)
     {
         // Priority: Environment variables > appsettings.json > default fallback
@@ -318,5 +390,40 @@ public class AuthController : ControllerBase
         });
     }
 
-}
+    private bool ValidateToken(string sessionToken)
+    {
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var validationParameters = GetValidationParameters();
 
+        SecurityToken validatedToken;
+        try
+        {
+            tokenHandler.ValidateToken(sessionToken, validationParameters, out validatedToken);
+            return true;
+        }
+        catch (System.Exception)
+        {
+            return false;
+        }
+    }
+
+    private TokenValidationParameters GetValidationParameters()
+    {
+        var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET") 
+                       ?? _configuration["JWT_SECRET"] 
+                       ?? throw new InvalidOperationException("JWT_SECRET must be configured. Set it in appsettings.json or as environment variable.");
+
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret));
+
+        return new TokenValidationParameters()
+        {
+            ValidateLifetime = false,
+            ValidateAudience = false,
+            ValidateIssuer = false,
+            ValidIssuer = "jwtIssuer",
+            ValidAudience = "jwtAudience",
+            IssuerSigningKey = key
+        };      
+    }
+
+}
