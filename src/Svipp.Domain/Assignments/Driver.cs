@@ -9,6 +9,9 @@ public class Driver
     public string AvailabilityStatus { get; set; } = null!; // possibly an enum later
 
     public ICollection<Booking> Bookings { get; set; } = new List<Booking>();
+
+    // Hvilke sparkesykler sjåføren disponerer
+    public ICollection<Scooter> Scooters { get; set; } = new List<Scooter>();
 }
 
 

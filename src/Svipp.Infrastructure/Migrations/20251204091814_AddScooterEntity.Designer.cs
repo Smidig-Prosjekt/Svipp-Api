@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Svipp.Infrastructure;
@@ -11,9 +12,11 @@ using Svipp.Infrastructure;
 namespace Svipp.Infrastructure.Migrations
 {
     [DbContext(typeof(SvippDbContext))]
-    partial class SvippDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251204091814_AddScooterEntity")]
+    partial class AddScooterEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

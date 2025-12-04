@@ -18,6 +18,7 @@ public class SvippDbContext : DbContext
     public DbSet<Booking> Bookings => Set<Booking>();
     public DbSet<Location> Locations => Set<Location>();
     public DbSet<Vehicle> Vehicles => Set<Vehicle>();
+    public DbSet<Scooter> Scooters => Set<Scooter>();
     public DbSet<Payment> Payments => Set<Payment>();
     public DbSet<Review> Reviews => Set<Review>();
     public DbSet<HandoverConfirmation> HandoverConfirmations => Set<HandoverConfirmation>();
@@ -62,6 +63,7 @@ public class SvippDbContext : DbContext
         // Primary keys
         modelBuilder.Entity<Location>().HasKey(x => x.LocationId);
         modelBuilder.Entity<Vehicle>().HasKey(x => x.VehicleId);
+        modelBuilder.Entity<Scooter>().HasKey(x => x.ScooterId);
         modelBuilder.Entity<Customer>().HasKey(x => x.CustomerId);
         modelBuilder.Entity<Driver>().HasKey(x => x.DriverId);
         modelBuilder.Entity<Booking>().HasKey(x => x.BookingId);
@@ -88,6 +90,13 @@ public class SvippDbContext : DbContext
             .HasOne(b => b.Driver)
             .WithMany(d => d.Bookings)
             .HasForeignKey(b => b.DriverId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Driver 1-* Scooter
+        modelBuilder.Entity<Scooter>()
+            .HasOne(s => s.Driver)
+            .WithMany(d => d.Scooters)
+            .HasForeignKey(s => s.DriverId)
             .OnDelete(DeleteBehavior.Restrict);
 
         // Vehicle 1-* Booking
