@@ -10,7 +10,7 @@ public class Vehicle
     public string Color { get; set; } = null!;
 
     // Nytt: detaljer om bilen
-    public string Make { get; set; } = null!;           // Merke, f.eks. "Tesla"
+    public string Brand { get; set; } = null!;          // Merke, f.eks. "Tesla"
     public string Model { get; set; } = null!;          // Modell, f.eks. "Model 3"
     public int? Year { get; set; }                      // Årsmodell (valgfri)
     public int? TrunkVolumeLiters { get; set; }         // Bagasjeromsvolum i liter (valgfri)
