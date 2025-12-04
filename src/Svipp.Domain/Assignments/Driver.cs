@@ -8,7 +8,9 @@ public class Driver
     public string Name { get; set; } = null!;
     public string AvailabilityStatus { get; set; } = null!; // possibly an enum later
 
-    // Sanntids-/sist kjente posisjon for matching og kartvisning
+    /// <summary>
+    /// Real-time or last known position for matching and map display.
+    /// </summary>
     public double? CurrentLatitude { get; set; }
     public double? CurrentLongitude { get; set; }
     public DateTime? LastLocationUpdatedAt { get; set; }

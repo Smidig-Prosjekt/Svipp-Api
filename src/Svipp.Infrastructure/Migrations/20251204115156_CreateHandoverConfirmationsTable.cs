@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Svipp.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class CreateHandoverConfirmationsTable : Migration
+    public partial class AddLocationFieldsToCustomersAndDrivers : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

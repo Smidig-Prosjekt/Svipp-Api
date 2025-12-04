@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Collections.Concurrent;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
 namespace Svipp.Api.Services;
@@ -55,6 +56,7 @@ public class RoadsService
         var lngStr = longitude.ToString(CultureInfo.InvariantCulture);
 
         // Google Roads API forventer formatet: path=lat,lng eller path=lat1,lng1|lat2,lng2
+        // WARNING: Including the API key in the URL exposes it to potential logging. Ensure that HTTP client logging is configured to redact sensitive query parameters.
         var url = $"https://roads.googleapis.com/v1/snapToRoads?path={latStr},{lngStr}&key={_apiKey}";
 
         using var response = await _httpClient.GetAsync(url, cancellationToken);
@@ -84,9 +86,14 @@ public class RoadsService
             return (latitude, longitude);
         }
 
-        var location = snappedPoints[0].GetProperty("location");
-        var snappedLat = location.GetProperty("latitude").GetDouble();
-        var snappedLng = location.GetProperty("longitude").GetDouble();
+        if (!snappedPoints[0].TryGetProperty("location", out var location) ||
+            !location.TryGetProperty("latitude", out var latElement) ||
+            !location.TryGetProperty("longitude", out var lngElement))
+        {
+            return (latitude, longitude);
+        }
+        var snappedLat = latElement.GetDouble();
+        var snappedLng = lngElement.GetDouble();
 
         var snapped = (snappedLat, snappedLng);
         _cache[cacheKey] = snapped;

@@ -7,6 +7,7 @@ using Svipp.Api.Services;
 using Svipp.Domain.Assignments;
 using Svipp.Infrastructure;
 using System.Collections.Concurrent;
+using System.Security.Claims;
 
 namespace Svipp.Api.Controllers;
 
@@ -24,6 +25,10 @@ public class LocationsController : ControllerBase
     // Enkel in-memory cache for mock-sjåfører per område, så vi ikke trenger å kalle
     // Roads API og regenerere på hvert frontend-refresh.
     // Key: sentrum for området, rundet til 4 desimaler (ca. 10-11 meter).
+    // NOTE: This static cache is only suitable for demo/development environments.
+    // In scaled or production deployments, each server instance will have its own cache,
+    // leading to inconsistent data. For production, use a distributed cache (e.g., Redis)
+    // or move caching to a dedicated service with appropriate lifetime management.
     private static readonly ConcurrentDictionary<string, (DateTime CreatedAt, List<MockDriverCacheItem> Drivers)> _mockDriverCache = new();
 
     // Hvor lenge mock-sjåfører for et område skal gjenbrukes før de regenereres.
@@ -53,6 +58,8 @@ public class LocationsController : ControllerBase
     /// </summary>
     [HttpPut("drivers/{driverId:int}")]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<ActionResult> UpdateDriverLocation(
         [FromRoute] int driverId,
@@ -63,6 +70,23 @@ public class LocationsController : ControllerBase
         {
             return ValidationProblem(ModelState);
         }
+
+        // Authorization: Verify that the authenticated user has permission to update this driver's location.
+        // TODO: Once the User-Driver relationship is established in the domain model, add proper ownership check.
+        // For now, we check if the user is authenticated and log a warning about the missing ownership verification.
+        var userId = GetUserIdFromToken();
+        if (userId == null)
+        {
+            return Unauthorized(new ErrorResponse
+            {
+                Message = "Ugyldig autentiseringstoken",
+                StatusCode = StatusCodes.Status401Unauthorized
+            });
+        }
+
+        // TODO: Add ownership check once Driver entity has a UserId property:
+        // if (driver.UserId != userId) return Forbid();
+        _logger.LogWarning("Authorization check skipped: Driver ownership verification not yet implemented for driverId={DriverId}, userId={UserId}", driverId, userId);
 
         var driver = await _dbContext.Drivers
             .FirstOrDefaultAsync(d => d.DriverId == driverId, cancellationToken);
@@ -96,6 +120,8 @@ public class LocationsController : ControllerBase
     /// </summary>
     [HttpPut("customers/{customerId:int}")]
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status403Forbidden)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<ActionResult> UpdateCustomerLocation(
         [FromRoute] int customerId,
@@ -106,6 +132,23 @@ public class LocationsController : ControllerBase
         {
             return ValidationProblem(ModelState);
         }
+
+        // Authorization: Verify that the authenticated user has permission to update this customer's location.
+        // TODO: Once the User-Customer relationship is established in the domain model, add proper ownership check.
+        // For now, we check if the user is authenticated and log a warning about the missing ownership verification.
+        var userId = GetUserIdFromToken();
+        if (userId == null)
+        {
+            return Unauthorized(new ErrorResponse
+            {
+                Message = "Ugyldig autentiseringstoken",
+                StatusCode = StatusCodes.Status401Unauthorized
+            });
+        }
+
+        // TODO: Add ownership check once Customer entity has a UserId property:
+        // if (customer.UserId != userId) return Forbid();
+        _logger.LogWarning("Authorization check skipped: Customer ownership verification not yet implemented for customerId={CustomerId}, userId={UserId}", customerId, userId);
 
         var customer = await _dbContext.Customers
             .FirstOrDefaultAsync(c => c.CustomerId == customerId, cancellationToken);
@@ -142,8 +185,8 @@ public class LocationsController : ControllerBase
     [AllowAnonymous] // Midlertidig åpnet for demo - kan fjernes senere når autentisering er på plass
     [ProducesResponseType(typeof(IEnumerable<object>), StatusCodes.Status200OK)]
     public async Task<ActionResult<IEnumerable<object>>> GetMockDrivers(
-        [FromQuery] double latitude,
-        [FromQuery] double longitude,
+        [FromQuery, System.ComponentModel.DataAnnotations.Range(-90, 90)] double latitude,
+        [FromQuery, System.ComponentModel.DataAnnotations.Range(-180, 180)] double longitude,
         [FromQuery] int count = 5,
         CancellationToken cancellationToken = default)
     {
@@ -215,10 +258,6 @@ public class LocationsController : ControllerBase
         var cacheDrivers = new List<MockDriverCacheItem>(count);
         var rnd = new Random();
 
-        // Bruk alltid Roads API for å snappe sjåfører til vei (vi har nå både in-memory cache
-        // i RoadsService og mock-driver-cache som begrenser antall kall).
-        var useRoadsApi = true;
-
         // Prøv flere ganger for å få punkter som faktisk ligger på vei
         // (Roads API kan falle tilbake til rå-koordinat hvis det ikke finnes vei i nærheten)
         var maxAttempts = count * 5;
@@ -240,31 +279,28 @@ public class LocationsController : ControllerBase
             var rawLat = center.lat + latOffset;
             var rawLng = center.lng + lngOffset;
 
-            double driverLat = rawLat;
-            double driverLng = rawLng;
+            // Prøv å snappe til nærmeste vei via Roads API, faller tilbake til rå-koordinat hvis ikke mulig
+            var (driverLat, driverLng) =
+                await _roadsService.SnapToRoadAsync(rawLat, rawLng, cancellationToken);
 
-            if (useRoadsApi)
+            // Hvis vi ikke fikk noe bedre enn rå-koordinaten (innenfor en veldig liten epsilon),
+            // hopper vi over dette punktet for å unngå sjåfører "midt i sjøen"
+            const double epsilon = 1e-5; // ca. 1 meter
+            if (Math.Abs(driverLat - rawLat) < epsilon && Math.Abs(driverLng - rawLng) < epsilon)
             {
-                // Prøv å snappe til nærmeste vei via Roads API, faller tilbake til rå-koordinat hvis ikke mulig
-                (driverLat, driverLng) =
-                    await _roadsService.SnapToRoadAsync(rawLat, rawLng, cancellationToken);
-
-                // Hvis vi ikke fikk noe bedre enn rå-koordinaten (innenfor en veldig liten epsilon),
-                // hopper vi over dette punktet for å unngå sjåfører "midt i sjøen"
-                const double epsilon = 1e-5; // ca. 1 meter
-                if (Math.Abs(driverLat - rawLat) < epsilon && Math.Abs(driverLng - rawLng) < epsilon)
-                {
-                    continue;
-                }
+                continue;
             }
 
             var name = names[rnd.Next(names.Length)];
             var rating = 3.5 + rnd.NextDouble() * 1.5;      // 3.5 - 5.0
             var pricePerKm = 15 + rnd.NextDouble() * 10;    // 15 - 25 kr/km
 
+            // Use consistent ID based on current index
+            var driverId = drivers.Count + 1;
+
             cacheDrivers.Add(new MockDriverCacheItem
             {
-                Id = cacheDrivers.Count + 1,
+                Id = driverId,
                 Name = name,
                 Rating = rating,
                 PricePerKm = pricePerKm,
@@ -274,7 +310,7 @@ public class LocationsController : ControllerBase
 
             drivers.Add(new
             {
-                id = drivers.Count + 1,
+                id = driverId,
                 name,
                 rating,
                 pricePerKm,
@@ -307,6 +343,16 @@ public class LocationsController : ControllerBase
         [FromQuery] double destinationLongitude,
         CancellationToken cancellationToken = default)
     {
+        // Validate coordinate ranges
+        if (originLatitude < -90 || originLatitude > 90)
+            return BadRequest("originLatitude must be between -90 and 90.");
+        if (originLongitude < -180 || originLongitude > 180)
+            return BadRequest("originLongitude must be between -180 and 180.");
+        if (destinationLatitude < -90 || destinationLatitude > 90)
+            return BadRequest("destinationLatitude must be between -90 and 90.");
+        if (destinationLongitude < -180 || destinationLongitude > 180)
+            return BadRequest("destinationLongitude must be between -180 and 180.");
+
         var (distanceKm, durationSeconds, encodedPolyline) =
             await _directionsService.GetRouteAsync(
                 originLatitude,
@@ -321,6 +367,32 @@ public class LocationsController : ControllerBase
             durationSeconds,
             encodedPolyline
         });
+    }
+
+    private Guid? GetUserIdFromToken()
+    {
+        var user = HttpContext.User;
+        if (user?.Identity is not { IsAuthenticated: true })
+        {
+            return null;
+        }
+
+        var idClaim = user.FindFirst(ClaimTypes.NameIdentifier)
+                      ?? user.FindFirst("sub")
+                      ?? user.FindFirst("userId")
+                      ?? user.FindFirst("id");
+
+        if (idClaim == null)
+        {
+            return null;
+        }
+
+        if (Guid.TryParse(idClaim.Value, out var userId))
+        {
+            return userId;
+        }
+
+        return null;
     }
 }
 
