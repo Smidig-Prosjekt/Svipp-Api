@@ -22,5 +22,3 @@ public class CheckVehicleCapacityResponse
     /// </summary>
     public int? VehicleTrunkVolumeLiters { get; set; }
 }
-
-
