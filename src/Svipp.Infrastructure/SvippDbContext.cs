@@ -99,6 +99,13 @@ public class SvippDbContext : DbContext
             .HasForeignKey(s => s.DriverId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        // Scooter *-0..1 Location (current location)
+        modelBuilder.Entity<Scooter>()
+            .HasOne(s => s.CurrentLocation)
+            .WithMany()
+            .HasForeignKey(s => s.CurrentLocationId)
+            .OnDelete(DeleteBehavior.SetNull);
+
         // Vehicle 1-* Booking
         modelBuilder.Entity<Booking>()
             .HasOne(b => b.Vehicle)
