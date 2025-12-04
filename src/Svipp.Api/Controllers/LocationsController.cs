@@ -195,10 +195,12 @@ public class LocationsController : ControllerBase
 
         var center = (lat: latitude, lng: longitude);
 
-        // For enkelhets skyld i denne demoen bruker vi én global cache-key for mock-sjåfører.
-        // Det betyr at så lenge cache ikke er utløpt, vil samme sett med sjåfører gjenbrukes
-        // på tvers av refresh, i stedet for å regenereres for hver posisjon.
-        const string cacheKey = "global-mock-drivers";
+        // Lag cache-key basert på posisjon, rundet til 3 desimaler (ca. 100 meter presisjon).
+        // Dette sikrer at brukere i samme område deler cache, mens brukere i forskjellige
+        // områder får sine egne sjåfører. 3 desimaler = ca. 100m radius per cache-entry.
+        var roundedLat = Math.Round(latitude, 3);
+        var roundedLng = Math.Round(longitude, 3);
+        var cacheKey = $"mock-drivers-{roundedLat:F3}-{roundedLng:F3}";
 
         var names = new[]
         {

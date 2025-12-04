@@ -194,7 +194,47 @@ Dette:
 
 ---
 
-### 3. Start API-et i Development
+### 3. Konfigurer Google Maps API Key
+
+API-et trenger en Google Maps API key for å bruke Roads API og Directions API. Du kan konfigurere dette på to måter:
+
+#### Alternativ A: Environment Variable (Anbefalt)
+
+Sett environment variable `GOOGLE_MAPS_API`:
+
+**PowerShell:**
+```powershell
+$env:GOOGLE_MAPS_API = "din-google-maps-api-key-her"
+```
+
+**Bash/Linux/Mac:**
+```bash
+export GOOGLE_MAPS_API="din-google-maps-api-key-her"
+```
+
+#### Alternativ B: appsettings.Development.json
+
+Legg til API key direkte i `src/Svipp.Api/appsettings.Development.json`:
+
+```json
+{
+  "GoogleMaps": {
+    "ApiKey": "din-google-maps-api-key-her"
+  }
+}
+```
+
+**Merk:** 
+- Samme API key brukes i både frontend (`NEXT_PUBLIC_GOOGLE_MAPS_API`) og backend
+- Du kan få en API key fra [Google Cloud Console](https://console.cloud.google.com/google/maps-apis)
+- Aktiver følgende APIs i Google Cloud Console:
+  - Maps JavaScript API (for frontend)
+  - Roads API (for backend)
+  - Directions API (for backend)
+
+---
+
+### 4. Start API-et i Development
 
 Sett miljø og kjør API-prosjektet:
 
@@ -211,7 +251,7 @@ Når API-et har startet:
 
 ---
 
-### 4. Hva som skjer under panseret
+### 5. Hva som skjer under panseret
 
 - `appsettings.Development.json` brukes fordi `ASPNETCORE_ENVIRONMENT=Development`.
   - Der ligger `ConnectionStrings:DefaultConnection` mot `svipp_dev_db`.
