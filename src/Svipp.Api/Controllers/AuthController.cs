@@ -9,7 +9,6 @@ using Svipp.Infrastructure;
 using System.ComponentModel.DataAnnotations;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Principal;
 using System.Text;
 
 namespace Svipp.Api.Controllers;
@@ -399,7 +398,7 @@ public class AuthController : ControllerBase
         SecurityToken validatedToken;
         try
         {
-            IPrincipal principal = tokenHandler.ValidateToken(sessionToken, validationParameters, out validatedToken);
+            tokenHandler.ValidateToken(sessionToken, validationParameters, out validatedToken);
             return true;
         }
         catch (System.Exception)
