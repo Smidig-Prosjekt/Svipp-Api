@@ -62,6 +62,9 @@ builder.Services.AddAuthorization();
 // Password hashing service
 builder.Services.AddSingleton<PasswordHasher>();
 
+// Vehicle capacity service
+builder.Services.AddSingleton<IVehicleCapacityService, VehicleCapacityService>();
+
 // CORS configuration
 builder.Services.AddCors(options =>
 {
