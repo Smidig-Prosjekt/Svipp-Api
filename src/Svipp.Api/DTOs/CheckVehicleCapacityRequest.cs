@@ -15,12 +15,10 @@ public class CheckVehicleCapacityRequest
     /// <summary>
     /// Årsmodell for bilen. Må være mellom 1970 og inneværende år.
     /// </summary>
-    public int Year { get; set; }
+    public int? Year { get; set; }
 
     /// <summary>
-    /// Tilgjengelig bagasjeromsvolum i liter for bilen (heltall).
+    /// Tilgjengelig bagasjeromsvolum i liter for bilen (heltall). Påkrevd.
     /// </summary>
-    public int? TrunkVolumeLiters { get; set; }
+    public int TrunkVolumeLiters { get; set; }
 }
-
-

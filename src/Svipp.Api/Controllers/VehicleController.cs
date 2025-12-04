@@ -1,4 +1,5 @@
 using System;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using Svipp.Api.DTOs;
 
@@ -12,80 +13,47 @@ public class VehicleController : ControllerBase
     // Holdt bevisst konservativ for sikkerhetsmargin.
     private const int ScooterVolumeLiters = 150;
 
+    // Compiled regex for performance
+    private static readonly Regex WhitespaceNormalizeRegex = new(@"\s+", RegexOptions.Compiled);
+    private static readonly Regex AllowedCharactersRegex = new(@"^[\p{L}0-9 .\-]+$", RegexOptions.Compiled);
+
     [HttpPost("check-capacity")]
     [ProducesResponseType(typeof(CheckVehicleCapacityResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ValidationProblemDetails), StatusCodes.Status400BadRequest)]
     public ActionResult<CheckVehicleCapacityResponse> CheckCapacity([FromBody] CheckVehicleCapacityRequest request)
     {
         // Normaliser mellomrom: trim start/slutt og erstatt multiple mellomrom med ett
-        if (!string.IsNullOrWhiteSpace(request.Brand))
-        {
-            request.Brand = System.Text.RegularExpressions.Regex.Replace(request.Brand.Trim(), @"\s+", " ");
-        }
+        // Bruk lokale variabler for å unngå mutering av request-objektet
+        var normalizedBrand = NormalizeWhitespace(request.Brand);
+        var normalizedModel = NormalizeWhitespace(request.Model);
 
-        if (!string.IsNullOrWhiteSpace(request.Model))
-        {
-            request.Model = System.Text.RegularExpressions.Regex.Replace(request.Model.Trim(), @"\s+", " ");
-        }
-
-        // Grunnleggende validering av påkrevde felter
-        if (string.IsNullOrWhiteSpace(request.Brand))
-        {
-            ModelState.AddModelError(nameof(request.Brand), "Brand is required.");
-        }
-        else if (request.Brand.Length is < 2 or > 50)
-        {
-            ModelState.AddModelError(nameof(request.Brand), "Brand must be between 2 and 50 characters.");
-        }
-        else if (!System.Text.RegularExpressions.Regex.IsMatch(request.Brand, "^[\\p{L}0-9 .\\-]+$"))
-        {
-            ModelState.AddModelError(nameof(request.Brand),
-                "Brand may only contain letters, numbers, spaces, dots and hyphens.");
-        }
-
-        if (string.IsNullOrWhiteSpace(request.Model))
-        {
-            ModelState.AddModelError(nameof(request.Model), "Model is required.");
-        }
-        else if (request.Model.Length is < 1 or > 100)
-        {
-            ModelState.AddModelError(nameof(request.Model), "Model must be between 1 and 100 characters.");
-        }
-        else if (!System.Text.RegularExpressions.Regex.IsMatch(request.Model, "^[\\p{L}0-9 .\\-]+$"))
-        {
-            ModelState.AddModelError(nameof(request.Model),
-                "Model may only contain letters, numbers, spaces, dots and hyphens.");
-        }
+        // Valider brand og model
+        ValidateVehicleStringField(normalizedBrand, nameof(request.Brand), 2, 50);
+        ValidateVehicleStringField(normalizedModel, nameof(request.Model), 1, 100);
 
         // Årsmodell: 1970 - inneværende år
         var currentYear = DateTime.UtcNow.Year;
-        if (request.Year < 1970 || request.Year > currentYear)
+        if (request.Year is null)
+        {
+            ModelState.AddModelError(nameof(request.Year), "Year is required.");
+        }
+        else if (request.Year < 1970 || request.Year > currentYear)
         {
             ModelState.AddModelError(nameof(request.Year),
                 $"Year must be between 1970 and {currentYear}.");
         }
 
-        // Volum må alltid oppgis eksplisitt nå
-        int? effectiveTrunkVolume = null;
-        if (request.TrunkVolumeLiters is null)
-        {
-            ModelState.AddModelError(nameof(request.TrunkVolumeLiters),
-                "TrunkVolumeLiters is required.");
-        }
-        else if (request.TrunkVolumeLiters <= 0)
+        // Volum validering
+        int effectiveTrunkVolume = request.TrunkVolumeLiters;
+        if (effectiveTrunkVolume <= 0)
         {
             ModelState.AddModelError(nameof(request.TrunkVolumeLiters),
                 "TrunkVolumeLiters must be greater than 0.");
         }
-        else if (request.TrunkVolumeLiters > 5000)
+        else if (effectiveTrunkVolume > 5000)
         {
-            // Harde grenser for å beskytte mot urimelig input.
             ModelState.AddModelError(nameof(request.TrunkVolumeLiters),
                 "TrunkVolumeLiters is unreasonably large. Max allowed is 5000 liters.");
-        }
-        else
-        {
-            effectiveTrunkVolume = request.TrunkVolumeLiters.Value;
         }
 
         if (!ModelState.IsValid)
@@ -112,6 +80,36 @@ public class VehicleController : ControllerBase
 
         return Ok(response);
     }
+
+    private static string NormalizeWhitespace(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return value ?? string.Empty;
+        }
+
+        return WhitespaceNormalizeRegex.Replace(value.Trim(), " ");
+    }
+
+    private void ValidateVehicleStringField(string? value, string fieldName, int minLength, int maxLength)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            ModelState.AddModelError(fieldName, $"{fieldName} is required.");
+            return;
+        }
+
+        if (value.Length < minLength || value.Length > maxLength)
+        {
+            ModelState.AddModelError(fieldName,
+                $"{fieldName} must be between {minLength} and {maxLength} characters.");
+            return;
+        }
+
+        if (!AllowedCharactersRegex.IsMatch(value))
+        {
+            ModelState.AddModelError(fieldName,
+                $"{fieldName} may only contain letters, numbers, spaces, dots and hyphens.");
+        }
+    }
 }
-
-
