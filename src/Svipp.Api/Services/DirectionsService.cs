@@ -77,6 +77,11 @@ public class DirectionsService
         {
             response = await _httpClient.GetAsync(url, cancellationToken);
         }
+        catch (OperationCanceledException)
+        {
+            // Allow cancellation exceptions to propagate without wrapping
+            throw;
+        }
         catch (Exception ex)
         {
             // Log sanitized URL to prevent API key exposure
