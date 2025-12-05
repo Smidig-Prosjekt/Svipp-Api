@@ -9,6 +9,12 @@ public class Driver
     public string AvailabilityStatus { get; set; } = null!; // possibly an enum later
 
     /// <summary>
+    /// Foreign key to the User who owns this driver profile.
+    /// Nullable to support legacy drivers without user accounts.
+    /// </summary>
+    public Guid? UserId { get; set; }
+
+    /// <summary>
     /// Real-time or last known position for matching and map display.
     /// </summary>
     public double? CurrentLatitude { get; set; }

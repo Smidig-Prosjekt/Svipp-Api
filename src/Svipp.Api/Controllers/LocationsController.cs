@@ -72,8 +72,6 @@ public class LocationsController : ControllerBase
         }
 
         // Authorization: Verify that the authenticated user has permission to update this driver's location.
-        // TODO: Once the User-Driver relationship is established in the domain model, add proper ownership check.
-        // For now, we check if the user is authenticated and log a warning about the missing ownership verification.
         var userId = GetUserIdFromToken();
         if (userId == null)
         {
@@ -83,10 +81,6 @@ public class LocationsController : ControllerBase
                 StatusCode = StatusCodes.Status401Unauthorized
             });
         }
-
-        // TODO: Add ownership check once Driver entity has a UserId property:
-        // if (driver.UserId != userId) return Forbid();
-        _logger.LogWarning("Authorization check skipped: Driver ownership verification not yet implemented for driverId={DriverId}, userId={UserId}", driverId, userId);
 
         var driver = await _dbContext.Drivers
             .FirstOrDefaultAsync(d => d.DriverId == driverId, cancellationToken);
@@ -98,6 +92,23 @@ public class LocationsController : ControllerBase
                 Message = $"Fant ingen sjåfør med id={driverId}.",
                 StatusCode = StatusCodes.Status404NotFound
             });
+        }
+
+        // Authorization check: Verify that the driver belongs to the authenticated user
+        if (driver.UserId.HasValue && driver.UserId.Value != userId.Value)
+        {
+            _logger.LogWarning(
+                "Authorization denied: User {UserId} attempted to update location for driver {DriverId} owned by user {DriverUserId}",
+                userId, driverId, driver.UserId);
+            return Forbid();
+        }
+
+        // If driver doesn't have a UserId yet, log a warning
+        if (!driver.UserId.HasValue)
+        {
+            _logger.LogWarning(
+                "Driver {DriverId} does not have an associated UserId. Location update allowed but should be linked to a user.",
+                driverId);
         }
 
         driver.CurrentLatitude = request.Latitude;
@@ -134,8 +145,6 @@ public class LocationsController : ControllerBase
         }
 
         // Authorization: Verify that the authenticated user has permission to update this customer's location.
-        // TODO: Once the User-Customer relationship is established in the domain model, add proper ownership check.
-        // For now, we check if the user is authenticated and log a warning about the missing ownership verification.
         var userId = GetUserIdFromToken();
         if (userId == null)
         {
@@ -145,10 +154,6 @@ public class LocationsController : ControllerBase
                 StatusCode = StatusCodes.Status401Unauthorized
             });
         }
-
-        // TODO: Add ownership check once Customer entity has a UserId property:
-        // if (customer.UserId != userId) return Forbid();
-        _logger.LogWarning("Authorization check skipped: Customer ownership verification not yet implemented for customerId={CustomerId}, userId={UserId}", customerId, userId);
 
         var customer = await _dbContext.Customers
             .FirstOrDefaultAsync(c => c.CustomerId == customerId, cancellationToken);
@@ -160,6 +165,23 @@ public class LocationsController : ControllerBase
                 Message = $"Fant ingen kunde med id={customerId}.",
                 StatusCode = StatusCodes.Status404NotFound
             });
+        }
+
+        // Authorization check: Verify that the customer belongs to the authenticated user
+        if (customer.UserId.HasValue && customer.UserId.Value != userId.Value)
+        {
+            _logger.LogWarning(
+                "Authorization denied: User {UserId} attempted to update location for customer {CustomerId} owned by user {CustomerUserId}",
+                userId, customerId, customer.UserId);
+            return Forbid();
+        }
+
+        // If customer doesn't have a UserId yet, log a warning
+        if (!customer.UserId.HasValue)
+        {
+            _logger.LogWarning(
+                "Customer {CustomerId} does not have an associated UserId. Location update allowed but should be linked to a user.",
+                customerId);
         }
 
         customer.CurrentLatitude = request.Latitude;

@@ -35,6 +35,36 @@ public class RoadsService
     }
 
     /// <summary>
+    /// Sanitizes a URL by replacing the API key with asterisks for safe logging.
+    /// </summary>
+    private static string SanitizeUrlForLogging(string url)
+    {
+        if (string.IsNullOrEmpty(url))
+            return url;
+
+        // Replace the API key in the URL with *** for logging purposes
+        var keyIndex = url.IndexOf("&key=", StringComparison.OrdinalIgnoreCase);
+        if (keyIndex == -1)
+            keyIndex = url.IndexOf("?key=", StringComparison.OrdinalIgnoreCase);
+
+        if (keyIndex != -1)
+        {
+            var keyStart = keyIndex + 5; // length of "&key=" or "?key="
+            var nextParam = url.IndexOf('&', keyStart);
+            if (nextParam == -1)
+            {
+                return url.Substring(0, keyStart) + "***";
+            }
+            else
+            {
+                return url.Substring(0, keyStart) + "***" + url.Substring(nextParam);
+            }
+        }
+
+        return url;
+    }
+
+    /// <summary>
     /// Snapper et punkt til nærmeste vei ved hjelp av Google Roads API.
     /// </summary>
     public async Task<(double lat, double lng)> SnapToRoadAsync(
@@ -55,50 +85,64 @@ public class RoadsService
         var latStr = latitude.ToString(CultureInfo.InvariantCulture);
         var lngStr = longitude.ToString(CultureInfo.InvariantCulture);
 
-        // Google Roads API forventer formatet: path=lat,lng eller path=lat1,lng1|lat2,lng2
-        // WARNING: Including the API key in the URL exposes it to potential logging. Ensure that HTTP client logging is configured to redact sensitive query parameters.
         var url = $"https://roads.googleapis.com/v1/snapToRoads?path={latStr},{lngStr}&key={_apiKey}";
 
-        using var response = await _httpClient.GetAsync(url, cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
+        HttpResponseMessage response;
+        try
         {
-            // Les feilmelding fra Google API for debugging
-            var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
-            _logger.LogWarning(
-                "Roads API returnerte {StatusCode} for koordinat ({Lat}, {Lng}): {Error}",
-                response.StatusCode,
-                latitude,
-                longitude,
-                errorContent);
-
-            // Hvis Roads API gir 4xx/5xx (f.eks. manglende rettigheter/kvoter),
-            // faller vi stille tilbake til original posisjon i stedet for å kaste.
+            response = await _httpClient.GetAsync(url, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            // Log sanitized URL to prevent API key exposure
+            _logger.LogError(ex,
+                "Failed to call Roads API for coordinate ({Lat}, {Lng}). URL (sanitized): {SanitizedUrl}",
+                latitude, longitude, SanitizeUrlForLogging(url));
+            // Fallback to original position on network errors
             return (latitude, longitude);
         }
 
-        var json = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken: cancellationToken);
-
-        if (!json.TryGetProperty("snappedPoints", out var snappedPoints) ||
-            snappedPoints.GetArrayLength() == 0)
+        using (response)
         {
-            // Fallback: returner original posisjon hvis Roads API ikke gir noe
-            return (latitude, longitude);
+            if (!response.IsSuccessStatusCode)
+            {
+                // Les feilmelding fra Google API for debugging
+                var errorContent = await response.Content.ReadAsStringAsync(cancellationToken);
+                _logger.LogWarning(
+                    "Roads API returnerte {StatusCode} for koordinat ({Lat}, {Lng}): {Error}",
+                    response.StatusCode,
+                    latitude,
+                    longitude,
+                    errorContent);
+
+                // Hvis Roads API gir 4xx/5xx (f.eks. manglende rettigheter/kvoter),
+                // faller vi stille tilbake til original posisjon i stedet for å kaste.
+                return (latitude, longitude);
+            }
+
+            var json = await response.Content.ReadFromJsonAsync<JsonElement>(cancellationToken: cancellationToken);
+
+            if (!json.TryGetProperty("snappedPoints", out var snappedPoints) ||
+                snappedPoints.GetArrayLength() == 0)
+            {
+                // Fallback: returner original posisjon hvis Roads API ikke gir noe
+                return (latitude, longitude);
+            }
+
+            if (!snappedPoints[0].TryGetProperty("location", out var location) ||
+                !location.TryGetProperty("latitude", out var latElement) ||
+                !location.TryGetProperty("longitude", out var lngElement))
+            {
+                return (latitude, longitude);
+            }
+            var snappedLat = latElement.GetDouble();
+            var snappedLng = lngElement.GetDouble();
+
+            var snapped = (snappedLat, snappedLng);
+            _cache[cacheKey] = snapped;
+
+            return snapped;
         }
-
-        if (!snappedPoints[0].TryGetProperty("location", out var location) ||
-            !location.TryGetProperty("latitude", out var latElement) ||
-            !location.TryGetProperty("longitude", out var lngElement))
-        {
-            return (latitude, longitude);
-        }
-        var snappedLat = latElement.GetDouble();
-        var snappedLng = lngElement.GetDouble();
-
-        var snapped = (snappedLat, snappedLng);
-        _cache[cacheKey] = snapped;
-
-        return snapped;
     }
 }
 
