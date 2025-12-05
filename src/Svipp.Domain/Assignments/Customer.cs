@@ -15,6 +15,12 @@ public class Customer
     public DateTime UpdatedAt { get; set; }
 
     /// <summary>
+    /// Foreign key to the User who owns this customer profile.
+    /// Nullable to support legacy customers without user accounts.
+    /// </summary>
+    public Guid? UserId { get; set; }
+
+    /// <summary>
     /// Last known position for customer (e.g., when booking is created)
     /// </summary>
     public double? CurrentLatitude { get; set; }
